@@ -12,8 +12,8 @@
 
 ## Global Constraints
 
-- Plugin name and marketplace name: `claude-orchestrator`; plugin id `claude-orchestrator@claude-orchestrator`.
-- Role skills are invoked as `claude-orchestrator:implementer`, `claude-orchestrator:reviewer`, `claude-orchestrator:planner`.
+- Plugin name and marketplace name: `td-orchestrator` (`claude-*` plugin names are reserved by the validator; the repo keeps the name claude-orchestrator); plugin id `td-orchestrator@td-orchestrator`.
+- Role skills are invoked as `td-orchestrator:implementer`, `td-orchestrator:reviewer`, `td-orchestrator:planner`.
 - Config file in target repos: `.claude/orchestrator.md`, `config_version: 1`.
 - Required config keys: `config_version`, `main_branch`, `test_gate`. Optional: `specs_dir`, `plans_dir` (required when `specs_dir` is set), `builders` (2), `reviewers` (1), `budgets` (`implementer: 90, reviewer: 45, planner: 60`), `legacy_main_mode` (`false`).
 - Fixed conventions: worktree `<MAIN_REPO>/.worktrees/<id>`, branch `td/<id>`, commit messages end with `(<ISSUE_ID>)`, agent names `impl-`/`rev-`/`plan-` + id without `td-`, labels `needs-human`, `stuck`, `agent-blocked`, `plan`.
@@ -95,8 +95,8 @@ fi
 if [ -f .claude-plugin/marketplace.json ]; then
 	out=$(claude plugin validate . 2>&1) || err "marketplace invalid"
 	echo "$out" | grep -qi 'warning' && { echo "$out"; err "marketplace has warnings"; }
-	[ "$(jq -r '.name' .claude-plugin/marketplace.json)" = claude-orchestrator ] || err "marketplace name"
-	[ "$(jq -r '.plugins[0].name' .claude-plugin/marketplace.json)" = claude-orchestrator ] || err "marketplace plugin name"
+	[ "$(jq -r '.name' .claude-plugin/marketplace.json)" = td-orchestrator ] || err "marketplace name"
+	[ "$(jq -r '.plugins[0].name' .claude-plugin/marketplace.json)" = td-orchestrator ] || err "marketplace plugin name"
 fi
 
 # --- checks (extended by later tasks) --------------------------------------
@@ -120,7 +120,7 @@ Expected: `FAIL: missing .claude-plugin/plugin.json`, `FAIL: missing .claude-plu
 
 ```json
 {
-  "name": "claude-orchestrator",
+  "name": "td-orchestrator",
   "description": "Works through all workable td issues of a repo with fresh implementer, reviewer and planner agents in Herdr tabs and git worktrees.",
   "version": "0.1.0",
   "author": {
@@ -137,7 +137,7 @@ Expected: `FAIL: missing .claude-plugin/plugin.json`, `FAIL: missing .claude-plu
 
 ```json
 {
-  "name": "claude-orchestrator",
+  "name": "td-orchestrator",
   "owner": {
     "name": "madic-creates"
   },
@@ -147,7 +147,7 @@ Expected: `FAIL: missing .claude-plugin/plugin.json`, `FAIL: missing .claude-plu
   },
   "plugins": [
     {
-      "name": "claude-orchestrator",
+      "name": "td-orchestrator",
       "source": "./",
       "description": "Works through all workable td issues of a repo with fresh implementer, reviewer and planner agents in Herdr tabs and git worktrees.",
       "category": "development",
@@ -187,12 +187,12 @@ Once per repository (writes `enabledPlugins` into the committed `.claude/setting
 
 ```bash
 cd /path/to/repo
-claude plugin install claude-orchestrator@claude-orchestrator --scope project
+claude plugin install td-orchestrator@td-orchestrator --scope project
 ```
 
 The setup wizard offers this step if it is missing.
 
-After changing the plugin source: `claude plugin marketplace update claude-orchestrator` and `claude plugin update claude-orchestrator@claude-orchestrator`, then restart Claude Code.
+After changing the plugin source: `claude plugin marketplace update td-orchestrator` and `claude plugin update td-orchestrator@td-orchestrator`, then restart Claude Code.
 
 ## Usage
 
@@ -200,7 +200,7 @@ Inside a Herdr pane, in the repository's main working tree:
 
 | Command | Effect |
 |---|---|
-| `/claude-orchestrator:orchestrate` | Run until nothing workable is left. |
+| `/td-orchestrator:orchestrate` | Run until nothing workable is left. |
 | `… --dry-run` | Show what would be started, change nothing. |
 | `… --builders N --reviewers M` | Override the slot counts from the config. |
 | `… --setup` | Run only the setup wizard, then stop. |
@@ -288,7 +288,7 @@ Expected: `FAIL: missing templates/orchestrator.md`, exit 1.
 
 ```markdown
 ---
-# claude-orchestrator config. Reference: README.md of the claude-orchestrator plugin.
+# claude-orchestrator config. Reference: README.md of the td-orchestrator plugin.
 config_version: 1
 # Branch that reviewers merge into and worktrees branch from.
 main_branch: {{main_branch}}
@@ -330,7 +330,7 @@ Replace the `## Configuration` section of `README.md` with:
 ````markdown
 ## Configuration
 
-Each repository has one committed file, `.claude/orchestrator.md`. The setup wizard creates it; `/claude-orchestrator:orchestrate --setup` runs the wizard again.
+Each repository has one committed file, `.claude/orchestrator.md`. The setup wizard creates it; `/td-orchestrator:orchestrate --setup` runs the wizard again.
 
 ```markdown
 ---
@@ -401,7 +401,7 @@ git commit -m "feat: config template and configuration reference (td-739c0f)"
 
 **Interfaces:**
 - Consumes: config keys from Task 2.
-- Produces: skills `claude-orchestrator:implementer|reviewer|planner`. Start-prompt parameters (exact names): `ISSUE_ID`, `BRANCH`, `MAIN_REPO`, `MAIN_BRANCH`, `MODE` (`worktree`|`main`, reviewer only), `REWORK` (`yes`|`no`, implementer/planner). Final reply lines: `DONE <id>`, `APPROVED <id>`, `REJECTED <id>`, `NEEDS-HUMAN <id>`.
+- Produces: skills `td-orchestrator:implementer|reviewer|planner`. Start-prompt parameters (exact names): `ISSUE_ID`, `BRANCH`, `MAIN_REPO`, `MAIN_BRANCH`, `MODE` (`worktree`|`main`, reviewer only), `REWORK` (`yes`|`no`, implementer/planner). Final reply lines: `DONE <id>`, `APPROVED <id>`, `REJECTED <id>`, `NEEDS-HUMAN <id>`.
 
 - [ ] **Step 1: Add the failing skill checks**
 
@@ -441,7 +441,7 @@ Expected: `FAIL: missing skills/orchestrate/SKILL.md` and the same for implement
 ````markdown
 ---
 name: implementer
-description: Implementer role of claude-orchestrator. Use only when a start prompt says "Use skill claude-orchestrator:implementer" with ISSUE_ID, BRANCH, MAIN_REPO and MAIN_BRANCH.
+description: Implementer role of td-orchestrator. Use only when a start prompt says "Use skill td-orchestrator:implementer" with ISSUE_ID, BRANCH, MAIN_REPO and MAIN_BRANCH.
 user-invocable: false
 ---
 
@@ -488,7 +488,7 @@ Then reply `NEEDS-HUMAN <ISSUE_ID>` and stop. Leave your commits on the branch.
 ````markdown
 ---
 name: reviewer
-description: Reviewer role of claude-orchestrator. Use only when a start prompt says "Use skill claude-orchestrator:reviewer" with ISSUE_ID, BRANCH, MAIN_REPO, MAIN_BRANCH and MODE.
+description: Reviewer role of td-orchestrator. Use only when a start prompt says "Use skill td-orchestrator:reviewer" with ISSUE_ID, BRANCH, MAIN_REPO, MAIN_BRANCH and MODE.
 user-invocable: false
 ---
 
@@ -554,7 +554,7 @@ Reply `REJECTED <ISSUE_ID>` and stop. Never fix the code yourself.
 ````markdown
 ---
 name: planner
-description: Planner role of claude-orchestrator. Use only when a start prompt says "Use skill claude-orchestrator:planner" with ISSUE_ID, BRANCH, MAIN_REPO and MAIN_BRANCH.
+description: Planner role of td-orchestrator. Use only when a start prompt says "Use skill td-orchestrator:planner" with ISSUE_ID, BRANCH, MAIN_REPO and MAIN_BRANCH.
 user-invocable: false
 ---
 
@@ -618,7 +618,7 @@ git commit -m "feat: generic implementer, reviewer and planner role skills (td-7
 
 **Interfaces:**
 - Consumes: role skills and start-prompt parameters (Task 3), config keys (Task 2).
-- Produces: `/claude-orchestrator:orchestrate [--dry-run] [--setup] [--builders N] [--reviewers M]`; it reads `setup.md` from its own base directory (Task 5).
+- Produces: `/td-orchestrator:orchestrate [--dry-run] [--setup] [--builders N] [--reviewers M]`; it reads `setup.md` from its own base directory (Task 5).
 
 - [ ] **Step 1: Add the failing content checks**
 
@@ -628,8 +628,8 @@ Append to the checks section of `scripts/check.sh`:
 # orchestrator: key rules present
 o=skills/orchestrate/SKILL.md
 if [ -f "$o" ]; then
-	for needle in 'Use skill claude-orchestrator:' 'setup.md' '--setup' '--dry-run' \
-		'legacy_main_mode' 'specs_dir' 'claude-orchestrator@claude-orchestrator' \
+	for needle in 'Use skill td-orchestrator:' 'setup.md' '--setup' '--dry-run' \
+		'legacy_main_mode' 'specs_dir' 'td-orchestrator@td-orchestrator' \
 		'unknown key' '<MAIN_BRANCH>' 'orchestrator: prompted' 'agent-blocked'; do
 		grep -qF -- "$needle" "$o" || err "$o lacks: $needle"
 	done
@@ -648,7 +648,7 @@ Expected: `FAIL: missing skills/orchestrate/SKILL.md`, exit 1.
 ````markdown
 ---
 name: orchestrate
-description: Run the claude-orchestrator — works through all workable td issues of this repo by starting fresh implementer, reviewer and planner agents in Herdr tabs and git worktrees. Use when the user types /claude-orchestrator:orchestrate or /orchestrate (optionally --dry-run, --setup, --builders N, --reviewers M).
+description: Run the td-orchestrator — works through all workable td issues of this repo by starting fresh implementer, reviewer and planner agents in Herdr tabs and git worktrees. Use when the user types /td-orchestrator:orchestrate or /orchestrate (optionally --dry-run, --setup, --builders N, --reviewers M).
 ---
 
 # Orchestrator
@@ -682,7 +682,7 @@ Remember `<MAIN_BRANCH>` = `main_branch`, the slot counts (after `--builders`/`-
 2. Config: if the file is missing or not valid (see "Config"): with `--dry-run`, list the missing or invalid keys and stop; otherwise read `setup.md` in this skill's base directory and follow it, then re-read the config. If it is still not valid, stop.
 3. `test "${HERDR_ENV:-}" = 1` — otherwise say you are not inside Herdr and stop.
 4. `command -v td`, `command -v herdr` — both must print a path.
-5. `<MAIN_REPO>/.claude/settings.json` must enable `claude-orchestrator@claude-orchestrator` (`enabledPlugins` entry `true`). Otherwise worker agents in worktrees would not find their role skills: run the wizard's step "Plugin enabled for the project" (in `setup.md`), and stop if the user declines.
+5. `<MAIN_REPO>/.claude/settings.json` must enable `td-orchestrator@td-orchestrator` (`enabledPlugins` entry `true`). Otherwise worker agents in worktrees would not find their role skills: run the wizard's step "Plugin enabled for the project" (in `setup.md`), and stop if the user declines.
 6. `git -C <MAIN_REPO> rev-parse --abbrev-ref HEAD` must print `<MAIN_BRANCH>`.
 7. `git -C <MAIN_REPO> status --porcelain` must print nothing — reviewers refuse to merge into a dirty main working tree. Otherwise notify the user with the paths and stop.
 8. `echo $HERDR_WORKSPACE_ID` → remember it as `<ORCH_WS>`, your own workspace. Every agent gets its own tab there, so the user sees all agents in one place.
@@ -756,7 +756,7 @@ One tab per agent; the tab label is the agent name. After a restart, `herdr agen
 
 Start prompt — always exactly this one line, built only from IDs and paths:
 ```
-Use skill claude-orchestrator:<implementer|reviewer|planner>. ISSUE_ID=<id> BRANCH=td/<id> MAIN_REPO=<MAIN_REPO> MAIN_BRANCH=<MAIN_BRANCH> MODE=<worktree|main> REWORK=<yes|no>
+Use skill td-orchestrator:<implementer|reviewer|planner>. ISSUE_ID=<id> BRANCH=td/<id> MAIN_REPO=<MAIN_REPO> MAIN_BRANCH=<MAIN_BRANCH> MODE=<worktree|main> REWORK=<yes|no>
 ```
 Send it without waiting for completion, then confirm the agent picked it up (Bash `timeout: 600000`):
 ```bash
@@ -889,8 +889,8 @@ if [ ! -f "$w" ]; then
 	err "missing $w"
 else
 	for needle in 'AskUserQuestion' '(Detected)' 'test_gate' 'command -v' 'check-ignore' \
-		'.worktrees/' 'claude plugin install claude-orchestrator@claude-orchestrator --scope project' \
-		'templates/orchestrator.md' 'chore: claude-orchestrator config' 'unknown key' '[]'; do
+		'.worktrees/' 'claude plugin install td-orchestrator@td-orchestrator --scope project' \
+		'templates/orchestrator.md' 'chore: td-orchestrator config' 'unknown key' '[]'; do
 		grep -qF -- "$needle" "$w" || err "$w lacks: $needle"
 	done
 fi
@@ -952,10 +952,10 @@ For each command, take its first word. `./x` or `path/x` → `test -x <MAIN_REPO
 
 ## 5. Plugin enabled for the project
 
-`<MAIN_REPO>/.claude/settings.json` has `"enabledPlugins": {"claude-orchestrator@claude-orchestrator": true}`? Check with `jq -e '.enabledPlugins["claude-orchestrator@claude-orchestrator"] == true' <MAIN_REPO>/.claude/settings.json`. If not, ask whether to enable it, then run in `<MAIN_REPO>`:
+`<MAIN_REPO>/.claude/settings.json` has `"enabledPlugins": {"td-orchestrator@td-orchestrator": true}`? Check with `jq -e '.enabledPlugins["td-orchestrator@td-orchestrator"] == true' <MAIN_REPO>/.claude/settings.json`. If not, ask whether to enable it, then run in `<MAIN_REPO>`:
 
 ```bash
-claude plugin install claude-orchestrator@claude-orchestrator --scope project
+claude plugin install td-orchestrator@td-orchestrator --scope project
 ```
 
 If that command fails (for example because the marketplace is not added on this machine), merge the entry into `.claude/settings.json` yourself with `jq` (create `{}` first if the file is missing) and tell the user to run `claude plugin marketplace add <plugin repo or madic-creates/claude-orchestrator>`. Declined → stop: worker agents would not find their role skills.
@@ -977,7 +977,7 @@ Ask: "Commit these files on `<MAIN_BRANCH>`?" listing `.claude/orchestrator.md` 
 
 ```bash
 git -C <MAIN_REPO> add .claude/orchestrator.md
-git -C <MAIN_REPO> commit -m "chore: claude-orchestrator config"
+git -C <MAIN_REPO> commit -m "chore: td-orchestrator config"
 ```
 (add `.gitignore` and `.claude/settings.json` to the `git add` if they changed). On no: tell the user the run needs a clean main working tree and stop.
 
@@ -1053,11 +1053,11 @@ Each case runs an interactive Claude session in a fixture repo. The executing ag
 ./scripts/make-fixture.sh <SCRATCH>/fx-a
 cd <SCRATCH>/fx-a && claude --plugin-dir /home/mne-adm/Git/personal/github.com/claude-orchestrator
 ```
-Prompt: `/claude-orchestrator:orchestrate --setup`. Accept every `(Detected)` option, accept the `.gitignore` and plugin offers, confirm the commit.
+Prompt: `/td-orchestrator:orchestrate --setup`. Accept every `(Detected)` option, accept the `.gitignore` and plugin offers, confirm the commit.
 Expected:
 - proposals: main branch `main`, test gate `./run_tests.sh`, specs `docs/specs`, plans `docs/plans`, legacy_main_mode `false`.
-- `.gitignore` contains `.worktrees/`; `.claude/settings.json` enables `claude-orchestrator@claude-orchestrator` (via `claude plugin install` or the `jq` fallback if the marketplace is not added yet — Task 7 adds it).
-- `git -C <SCRATCH>/fx-a log --oneline -1` shows `chore: claude-orchestrator config`; `git status --porcelain` is empty.
+- `.gitignore` contains `.worktrees/`; `.claude/settings.json` enables `td-orchestrator@td-orchestrator` (via `claude plugin install` or the `jq` fallback if the marketplace is not added yet — Task 7 adds it).
+- `git -C <SCRATCH>/fx-a log --oneline -1` shows `chore: td-orchestrator config`; `git status --porcelain` is empty.
 - `python3 -c "import yaml,re,sys; t=open('.claude/orchestrator.md').read(); d=yaml.safe_load(re.match(r'^---\n(.*?)\n---\n',t,re.S).group(1)); print(d)"` prints `test_gate: ['./run_tests.sh']`, `main_branch: 'main'`.
 - The wizard stopped after step 8 (no Herdr check, no agents).
 
@@ -1070,12 +1070,12 @@ printf -- '---\nconfig_version: 1\nmain_branch: master\ntest-gate:\n  - ./run_te
 git -C <SCRATCH>/fx-b add -A && git -C <SCRATCH>/fx-b commit -qm "typo config"
 cd <SCRATCH>/fx-b && claude --plugin-dir /home/mne-adm/Git/personal/github.com/claude-orchestrator
 ```
-Prompt: `/claude-orchestrator:orchestrate --setup`.
+Prompt: `/td-orchestrator:orchestrate --setup`.
 Expected: `warning: unknown key test-gate`, a question whether it was meant as `test_gate`; main branch proposal `master (Detected)`; the written frontmatter has `test_gate` and no `test-gate`; the commit lands on `master`.
 
 - [ ] **Step 3: Case C — no test gate**
 
-In `fx-a`, run `/claude-orchestrator:orchestrate --setup` again and pick `No test gate ([])`, confirm twice.
+In `fx-a`, run `/td-orchestrator:orchestrate --setup` again and pick `No test gate ([])`, confirm twice.
 Expected: two confirmations; written `test_gate: []`; role sections unchanged.
 
 - [ ] **Step 4: Case D — dry run with missing config**
@@ -1084,7 +1084,7 @@ Expected: two confirmations; written `test_gate: []`; role sections unchanged.
 ./scripts/make-fixture.sh <SCRATCH>/fx-d
 cd <SCRATCH>/fx-d && claude --plugin-dir /home/mne-adm/Git/personal/github.com/claude-orchestrator
 ```
-Prompt: `/claude-orchestrator:orchestrate --dry-run`.
+Prompt: `/td-orchestrator:orchestrate --dry-run`.
 Expected: a report listing `.claude/orchestrator.md` as missing (required keys `config_version`, `main_branch`, `test_gate`); no question asked; `git status --porcelain` empty and no `.claude/` directory afterwards.
 
 - [ ] **Step 5: Fix and record**
@@ -1128,7 +1128,7 @@ git merge --ff-only td/td-739c0f
 claude plugin marketplace add /home/mne-adm/Git/personal/github.com/claude-orchestrator
 claude plugin marketplace list
 ```
-Expected: check green; `claude-orchestrator` listed.
+Expected: check green; `td-orchestrator` listed.
 
 - [ ] **Step 4: Migrate on a game worktree branch**
 
@@ -1136,17 +1136,17 @@ Expected: check green; `claude-orchestrator` listed.
 cd /home/mne-adm/Git/personal/github.com/game
 git worktree add -b td/td-739c0f .worktrees/td-739c0f main
 cd .worktrees/td-739c0f
-claude plugin install claude-orchestrator@claude-orchestrator --scope project
+claude plugin install td-orchestrator@td-orchestrator --scope project
 git rm -q .claude/skills/orchestrate/SKILL.md .claude/orchestrator/prompts/implementer.md .claude/orchestrator/prompts/reviewer.md .claude/orchestrator/prompts/planner.md
 ```
 
-Check `.claude/settings.json` now contains `"claude-orchestrator@claude-orchestrator": true` under `enabledPlugins`; if the install wrote it elsewhere (main tree instead of worktree), move the file into the worktree.
+Check `.claude/settings.json` now contains `"td-orchestrator@td-orchestrator": true` under `enabledPlugins`; if the install wrote it elsewhere (main tree instead of worktree), move the file into the worktree.
 
 Create `.claude/orchestrator.md`:
 
 ```markdown
 ---
-# claude-orchestrator config. Reference: README.md of the claude-orchestrator plugin.
+# claude-orchestrator config. Reference: README.md of the td-orchestrator plugin.
 config_version: 1
 # Branch that reviewers merge into and worktrees branch from.
 main_branch: main
@@ -1195,7 +1195,7 @@ In `CLAUDE.md`, replace the whole `## Agent orchestrator` section with:
 ## Agent orchestrator
 
 - Provided by the `claude-orchestrator` plugin (`/home/mne-adm/Git/personal/github.com/claude-orchestrator`, enabled in `.claude/settings.json`). Config: `.claude/orchestrator.md` (test gate, doc paths, role notes).
-- Start in a Herdr pane with `/claude-orchestrator:orchestrate` (`--dry-run` to preview, `--setup` to re-run the config wizard). It works through all workable td issues with fresh implementer, reviewer and planner agents.
+- Start in a Herdr pane with `/td-orchestrator:orchestrate` (`--dry-run` to preview, `--setup` to re-run the config wizard). It works through all workable td issues with fresh implementer, reviewer and planner agents.
 - Labels: `needs-human` (needs a user decision), `stuck` (3 failed attempts, branch kept), `agent-blocked` (agent waits at a prompt), `plan` (handled by the planner).
 ```
 
@@ -1204,7 +1204,7 @@ Also update the "Git is enabled" bullet's reference `See /orchestrate.` to `See 
 In `docs/superpowers/specs/2026-10-14-agent-orchestrator-design.md`, replace the line `- **Status:** draft, awaiting user review` with:
 
 ```markdown
-- **Status:** superseded by the `claude-orchestrator` plugin (`claude-orchestrator/docs/design.md`, 2026-10-15)
+- **Status:** superseded by the `td-orchestrator` plugin (`claude-orchestrator/docs/design.md`, 2026-10-15)
 ```
 
 - [ ] **Step 6: Run game's test gate**
@@ -1219,15 +1219,15 @@ Expected: both green (no code changed; this proves the branch is sound). Status 
 
 ```bash
 git add .claude/orchestrator.md .claude/settings.json CLAUDE.md docs/superpowers/specs/2026-10-14-agent-orchestrator-design.md
-git commit -m "chore: switch to the claude-orchestrator plugin (td-739c0f)"
+git commit -m "chore: switch to the td-orchestrator plugin (td-739c0f)"
 ```
 
 This is the change that replaces `game`'s orchestrator; merging it into `main` follows the repo rule "only a reviewer merges". Submit for review (`td review`) and let a reviewer session merge it (`git -C /home/mne-adm/Git/personal/github.com/game merge --ff-only td/td-739c0f`, then `git worktree remove .worktrees/td-739c0f`, `git branch -d td/td-739c0f`).
 
 - [ ] **Step 8: Compare dry runs**
 
-After the merge, in a fresh Claude session in a Herdr pane in `game`: `/claude-orchestrator:orchestrate --dry-run`. Compare with `<SCRATCH>/dryrun-v1.txt`.
-Expected: same agents, same queue, same skip reasons, except for issues whose td state changed in between (name them). The wizard must not start (config valid). Differences → fix in the plugin, re-run check.sh, commit `fix: … (td-739c0f)`, `claude plugin marketplace update claude-orchestrator`, `claude plugin update claude-orchestrator@claude-orchestrator`, restart the session, re-run the dry run.
+After the merge, in a fresh Claude session in a Herdr pane in `game`: `/td-orchestrator:orchestrate --dry-run`. Compare with `<SCRATCH>/dryrun-v1.txt`.
+Expected: same agents, same queue, same skip reasons, except for issues whose td state changed in between (name them). The wizard must not start (config valid). Differences → fix in the plugin, re-run check.sh, commit `fix: … (td-739c0f)`, `claude plugin marketplace update td-orchestrator`, `claude plugin update td-orchestrator@td-orchestrator`, restart the session, re-run the dry run.
 
 ---
 
@@ -1237,7 +1237,7 @@ Expected: same agents, same queue, same skip reasons, except for issues whose td
 
 - [ ] **Step 1: Hand over to the user**
 
-The user starts, in a Herdr pane in `game`: `/claude-orchestrator:orchestrate --builders 1 --reviewers 1` and lets it complete at least one issue end to end (worktree, implementer, reviewer, merge, cleanup).
+The user starts, in a Herdr pane in `game`: `/td-orchestrator:orchestrate --builders 1 --reviewers 1` and lets it complete at least one issue end to end (worktree, implementer, reviewer, merge, cleanup).
 
 - [ ] **Step 2: Record and close**
 

@@ -1,0 +1,19 @@
+{
+  "name": "td-orchestrator",
+  "owner": {
+    "name": "madic-creates"
+  },
+  "metadata": {
+    "description": "Agent orchestrator for td + Herdr + git worktrees",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "td-orchestrator",
+      "source": "./",
+      "description": "Works through all workable td issues of a repo with fresh implementer, reviewer and planner agents in Herdr tabs and git worktrees.",
+      "category": "development",
+      "tags": ["orchestration", "agents", "td", "herdr", "worktrees"]
+    }
+  ]
+}

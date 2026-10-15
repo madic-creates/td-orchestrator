@@ -31,8 +31,8 @@ Repository: `/home/mne-adm/Git/personal/github.com/claude-orchestrator`, branch 
 
 ```
 claude-orchestrator/
-  .claude-plugin/plugin.json        # name: claude-orchestrator
-  .claude-plugin/marketplace.json   # marketplace "claude-orchestrator" listing this plugin (source "./")
+  .claude-plugin/plugin.json        # name: td-orchestrator ("claude-*" plugin names are reserved)
+  .claude-plugin/marketplace.json   # marketplace "td-orchestrator" listing this plugin (source "./")
   skills/orchestrate/SKILL.md       # orchestrator: preconditions, loop, monitoring, error handling
   skills/orchestrate/setup.md       # wizard procedure, read only when the config is missing/invalid or on --setup
   skills/implementer/SKILL.md       # role: implementer
@@ -113,9 +113,9 @@ With `--dry-run` the wizard does not run: the dry run reports which keys are mis
 2. **Confirm** each value with the user via `AskUserQuestion`: detected value first ("(Detected)"), plausible alternatives, "Other" for free input. Up to four questions per call; optional keys with a default are asked in one final "keep defaults?" question.
 3. **Check** the `test_gate` commands: each command's first word must resolve (`command -v`, or an executable file relative to the repo root). A failing check is shown to the user, who corrects or confirms it. The wizard never runs the test gate.
 4. **`.gitignore`:** if `.worktrees/` is not ignored (`git check-ignore -q .worktrees/x`), offer to append it.
-5. **Plugin enabled for the project:** if `.claude/settings.json` does not enable `claude-orchestrator@claude-orchestrator`, offer to add it (merging with existing content).
+5. **Plugin enabled for the project:** if `.claude/settings.json` does not enable `td-orchestrator@td-orchestrator`, offer to add it (merging with existing content).
 6. **Write** `.claude/orchestrator.md` from `templates/orchestrator.md` with the confirmed values and empty role sections, then show the result.
-7. **Commit** the changed files on `main_branch` after the user's OK (`chore: claude-orchestrator config`, no td suffix required). The run needs a clean main working tree, so a declined commit ends the run with that explanation.
+7. **Commit** the changed files on `main_branch` after the user's OK (`chore: td-orchestrator config`, no td suffix required). The run needs a clean main working tree, so a declined commit ends the run with that explanation.
 8. Continue with the normal preconditions.
 
 The wizard is the only part of the orchestrator that talks to the user directly, and it runs only before any agent is started.
@@ -131,7 +131,7 @@ Behaviour is v1's, with these changes:
 - With `specs_dir` unset, issues labelled `plan` are reported as not workable (`planner disabled: no specs_dir`).
 - **Start prompt**, still one line built only from IDs and paths:
   ```
-  Use skill claude-orchestrator:<role>. ISSUE_ID=<id> BRANCH=td/<id> MAIN_REPO=<MAIN_REPO> MAIN_BRANCH=<MAIN_BRANCH> MODE=<worktree|main> REWORK=<yes|no>
+  Use skill td-orchestrator:<role>. ISSUE_ID=<id> BRANCH=td/<id> MAIN_REPO=<MAIN_REPO> MAIN_BRANCH=<MAIN_BRANCH> MODE=<worktree|main> REWORK=<yes|no>
   ```
 - The spec reference points to this document.
 
@@ -158,7 +158,7 @@ Done while no orchestrator runs in `game`.
 
 1. Before the change: run v1 `/orchestrate --dry-run` and keep its output as the reference.
 2. Add `.claude/orchestrator.md` with the values shown above (including the Godot notes in `## Implementer`).
-3. Add `.claude/settings.json` enabling `claude-orchestrator@claude-orchestrator`.
+3. Add `.claude/settings.json` enabling `td-orchestrator@td-orchestrator`.
 4. Delete `.claude/skills/orchestrate/` and `.claude/orchestrator/prompts/`.
 5. Update the "Agent orchestrator" section of `CLAUDE.md` (plugin, config file, `/orchestrate --setup`).
 6. Mark the v1 spec as superseded by this document.

@@ -1,0 +1,12 @@
+{
+  "name": "td-orchestrator",
+  "description": "Works through all workable td issues of a repo with fresh implementer, reviewer and planner agents in Herdr tabs and git worktrees.",
+  "version": "0.1.0",
+  "author": {
+    "name": "madic-creates",
+    "url": "https://github.com/madic-creates"
+  },
+  "homepage": "https://github.com/madic-creates/claude-orchestrator",
+  "repository": "https://github.com/madic-creates/claude-orchestrator",
+  "license": "MIT"
+}
