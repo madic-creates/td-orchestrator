@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Static test gate for the claude-orchestrator plugin.
+# Static test gate for the td-orchestrator plugin.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 

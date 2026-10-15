@@ -6,7 +6,7 @@
     "name": "madic-creates",
     "url": "https://github.com/madic-creates"
   },
-  "homepage": "https://github.com/madic-creates/claude-orchestrator",
-  "repository": "https://github.com/madic-creates/claude-orchestrator",
+  "homepage": "https://github.com/madic-creates/td-orchestrator",
+  "repository": "https://github.com/madic-creates/td-orchestrator",
   "license": "MIT"
 }

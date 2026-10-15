@@ -1,4 +1,4 @@
-# claude-orchestrator – Design
+# td-orchestrator – Design
 
 - **Date:** 2026-10-15
 - **td issue:** td-b470d9 (epic td-739c0f, tracked in the `game` repo)
@@ -27,10 +27,10 @@ The v1 orchestrator lived inside the `game` repo and hard-coded that repo's test
 
 ## Repository and distribution
 
-Repository: `/home/mne-adm/Git/personal/github.com/claude-orchestrator`, branch `main`, remote `origin` = `github.com/madic-creates/claude-orchestrator`. Pushing happens only when the user asks.
+Repository: `/home/mne-adm/Git/personal/github.com/claude-orchestrator`, branch `main`, remote `origin` = `github.com/madic-creates/td-orchestrator`. Pushing happens only when the user asks.
 
 ```
-claude-orchestrator/
+td-orchestrator/
   .claude-plugin/plugin.json        # name: td-orchestrator ("claude-*" plugin names are reserved)
   .claude-plugin/marketplace.json   # marketplace "td-orchestrator" listing this plugin (source "./")
   skills/orchestrate/SKILL.md       # orchestrator: preconditions, loop, monitoring, error handling

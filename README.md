@@ -1,4 +1,4 @@
-# td-orchestrator (repo: claude-orchestrator)
+# td-orchestrator
 
 A Claude Code plugin that works through all workable [td](https://github.com/marcus/td) issues of a git repository on its own. It starts a fresh agent per issue and role — implementer, reviewer, planner — each in its own [Herdr](https://herdr.dev) tab and git worktree, checks the td state they leave behind, merges reviewed work into the main branch and notifies you only when it needs you.
 
@@ -16,7 +16,7 @@ Design: [`docs/design.md`](docs/design.md).
 Once per machine:
 
 ```bash
-claude plugin marketplace add /path/to/claude-orchestrator   # or: madic-creates/claude-orchestrator
+claude plugin marketplace add /path/to/td-orchestrator   # or: madic-creates/td-orchestrator
 ```
 
 Once per repository (writes `enabledPlugins` into the committed `.claude/settings.json`, so everyone in the repo gets `/td-orchestrator:orchestrate`; worker agents are started with `--plugin-dir` and do not depend on it):
@@ -30,8 +30,8 @@ The setup wizard offers this step if it is missing.
 
 Picking up plugin changes depends on how the marketplace was added:
 
-- **Local directory** (`marketplace add /path/to/claude-orchestrator`): the plugin is read straight from that folder, so edits take effect at the next session start or after `/reload-plugins`. `claude plugin update` has nothing to do here.
-- **GitHub** (`marketplace add madic-creates/claude-orchestrator`): run `claude plugin marketplace update td-orchestrator` and `claude plugin update td-orchestrator@td-orchestrator`, then restart Claude Code.
+- **Local directory** (`marketplace add /path/to/td-orchestrator`): the plugin is read straight from that folder, so edits take effect at the next session start or after `/reload-plugins`. `claude plugin update` has nothing to do here.
+- **GitHub** (`marketplace add madic-creates/td-orchestrator`): run `claude plugin marketplace update td-orchestrator` and `claude plugin update td-orchestrator@td-orchestrator`, then restart Claude Code.
 
 ## Usage
 
@@ -106,6 +106,6 @@ Fixed conventions: worktrees at `.worktrees/<id>` (add `.worktrees/` to `.gitign
 Users who installed from GitHub get a new copy only when `version` in `.claude-plugin/plugin.json` changes; commits pushed without a version bump do not reach them. To release:
 
 1. Bump `version` in `.claude-plugin/plugin.json` (semver). Do not add `version` to the plugin entry in `marketplace.json` — `plugin.json` wins and `claude plugin validate` flags the mismatch.
-2. Optionally tag the commit, e.g. `git tag v0.2.0 && git push --tags`. Claude Code does not need tags or GitHub releases; a tag only lets users pin a version with `claude plugin marketplace add madic-creates/claude-orchestrator#v0.2.0`.
+2. Optionally tag the commit, e.g. `git tag v0.2.0 && git push --tags`. Claude Code does not need tags or GitHub releases; a tag only lets users pin a version with `claude plugin marketplace add madic-creates/td-orchestrator#v0.2.0`.
 
 `metadata.version` in `marketplace.json` versions the catalog, not the plugin, and plays no part in updates. Installs from a local marketplace directory ignore `version` entirely.

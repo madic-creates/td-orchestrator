@@ -49,7 +49,7 @@ Check `jq -e '.enabledPlugins["td-orchestrator@td-orchestrator"] == true' <MAIN_
 claude plugin install td-orchestrator@td-orchestrator --scope project
 ```
 
-If that command fails (for example because the marketplace is not added on this machine), merge the entry into `.claude/settings.json` yourself with `jq` (create `{}` first if the file is missing) and tell the user to run `claude plugin marketplace add <path to the plugin repo, or madic-creates/claude-orchestrator>`. Declined → stop: worker agents would not find their role skills.
+If that command fails (for example because the marketplace is not added on this machine), merge the entry into `.claude/settings.json` yourself with `jq` (create `{}` first if the file is missing) and tell the user to run `claude plugin marketplace add <path to the plugin repo, or madic-creates/td-orchestrator>`. Declined → stop: worker agents would not find their role skills.
 
 ## 6. Write the config
 
