@@ -62,7 +62,7 @@ In the `game` repo (Task 7): `.claude/orchestrator.md` (new), `.claude/settings.
 - Create: `README.md`
 
 **Interfaces:**
-- Produces: `scripts/check.sh` — run from anywhere, exit 0 = green. Later tasks extend it by appending to the `checks` section.
+- Produces: `scripts/check.sh`: run from anywhere, exit 0 = green. Later tasks extend it by appending to the `checks` section.
 
 - [ ] **Step 1: Create the branch**
 
@@ -236,7 +236,7 @@ git commit -m "feat: plugin scaffold, marketplace and static check (td-739c0f)"
 - Modify: `README.md` (Configuration section)
 
 **Interfaces:**
-- Produces: `templates/orchestrator.md` with placeholders `{{main_branch}}`, `{{test_gate}}`, `{{specs_dir}}`, `{{plans_dir}}`, `{{builders}}`, `{{reviewers}}`, `{{legacy_main_mode}}` — the wizard (Task 5) replaces them. Optional keys whose value is unset are written as commented lines.
+- Produces: `templates/orchestrator.md` with placeholders `{{main_branch}}`, `{{test_gate}}`, `{{specs_dir}}`, `{{plans_dir}}`, `{{builders}}`, `{{reviewers}}`, `{{legacy_main_mode}}`. The wizard (Task 5) replaces them. Optional keys whose value is unset are written as commented lines.
 
 - [ ] **Step 1: Add the failing template check**
 
@@ -1043,11 +1043,11 @@ git commit -m "feat: setup wizard with detection, confirmation and fixture repo 
 **Files:** none (manual test; results logged in td).
 
 **Interfaces:**
-- Consumes: everything from Tasks 1–5. Uses `claude --plugin-dir <plugin repo>` so the plugin source is tested without installing.
+- Consumes: everything from Tasks 1 to 5. Uses `claude --plugin-dir <plugin repo>` so the plugin source is tested without installing.
 
 Each case runs an interactive Claude session in a fixture repo. The executing agent cannot answer `AskUserQuestion` dialogs of a nested session itself; run these cases in a Herdr tab and answer the wizard's questions as noted, or ask the user to do so. `<SCRATCH>` is the session scratchpad directory.
 
-- [ ] **Step 1: Case A — fresh repo, defaults accepted**
+- [ ] **Step 1: Case A: fresh repo, defaults accepted**
 
 ```bash
 ./scripts/make-fixture.sh <SCRATCH>/fx-a
@@ -1056,12 +1056,12 @@ cd <SCRATCH>/fx-a && claude --plugin-dir /home/mne-adm/Git/personal/github.com/c
 Prompt: `/td-orchestrator:orchestrate --setup`. Accept every `(Detected)` option, accept the `.gitignore` and plugin offers, confirm the commit.
 Expected:
 - proposals: main branch `main`, test gate `./run_tests.sh`, specs `docs/specs`, plans `docs/plans`, legacy_main_mode `false`.
-- `.gitignore` contains `.worktrees/`; `.claude/settings.json` enables `td-orchestrator@td-orchestrator` (via `claude plugin install` or the `jq` fallback if the marketplace is not added yet — Task 7 adds it).
+- `.gitignore` contains `.worktrees/`; `.claude/settings.json` enables `td-orchestrator@td-orchestrator` (via `claude plugin install` or the `jq` fallback if the marketplace is not added yet; Task 7 adds it).
 - `git -C <SCRATCH>/fx-a log --oneline -1` shows `chore: td-orchestrator config`; `git status --porcelain` is empty.
 - `python3 -c "import yaml,re,sys; t=open('.claude/orchestrator.md').read(); d=yaml.safe_load(re.match(r'^---\n(.*?)\n---\n',t,re.S).group(1)); print(d)"` prints `test_gate: ['./run_tests.sh']`, `main_branch: 'main'`.
 - The wizard stopped after step 8 (no Herdr check, no agents).
 
-- [ ] **Step 2: Case B — `master` branch and a typo'd key**
+- [ ] **Step 2: Case B: `master` branch and a typo'd key**
 
 ```bash
 ./scripts/make-fixture.sh <SCRATCH>/fx-b master
@@ -1073,12 +1073,12 @@ cd <SCRATCH>/fx-b && claude --plugin-dir /home/mne-adm/Git/personal/github.com/c
 Prompt: `/td-orchestrator:orchestrate --setup`.
 Expected: `warning: unknown key test-gate`, a question whether it was meant as `test_gate`; main branch proposal `master (Detected)`; the written frontmatter has `test_gate` and no `test-gate`; the commit lands on `master`.
 
-- [ ] **Step 3: Case C — no test gate**
+- [ ] **Step 3: Case C: no test gate**
 
 In `fx-a`, run `/td-orchestrator:orchestrate --setup` again and pick `No test gate ([])`, confirm twice.
 Expected: two confirmations; written `test_gate: []`; role sections unchanged.
 
-- [ ] **Step 4: Case D — dry run with missing config**
+- [ ] **Step 4: Case D: dry run with missing config**
 
 ```bash
 ./scripts/make-fixture.sh <SCRATCH>/fx-d

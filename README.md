@@ -1,6 +1,6 @@
 # td-orchestrator
 
-A Claude Code plugin that works through all workable [td](https://github.com/marcus/td) issues of a git repository on its own. It starts a fresh agent per issue and role — implementer, reviewer, planner — each in its own [Herdr](https://herdr.dev) tab and git worktree, checks the td state they leave behind, merges reviewed work into the main branch and notifies you only when it needs you.
+A Claude Code plugin that works through all workable [td](https://github.com/marcus/td) issues of a git repository on its own. It starts a fresh agent per issue and role (implementer, reviewer, planner), each in its own [Herdr](https://herdr.dev) tab and git worktree, checks the td state they leave behind, merges reviewed work into the main branch and notifies you only when it needs you.
 
 Design: [`docs/design.md`](docs/design.md).
 
@@ -19,7 +19,7 @@ Once per machine:
 claude plugin marketplace add /path/to/td-orchestrator   # or: madic-creates/td-orchestrator
 ```
 
-Once per repository (writes `enabledPlugins` into the committed `.claude/settings.json`, so everyone in the repo gets `/td-orchestrator:orchestrate`; worker agents are started with `--plugin-dir` and do not depend on it):
+Once per repository. This writes `enabledPlugins` into the committed `.claude/settings.json`, so everyone in the repo gets `/td-orchestrator:orchestrate`. Worker agents are started with `--plugin-dir` and do not depend on it.
 
 ```bash
 cd /path/to/repo
@@ -72,9 +72,9 @@ Run `npm ci` first in a fresh worktree.
 
 | Key | Required | Default | Meaning |
 |---|---|---|---|
-| `config_version` | yes | – | Must be `1`. |
-| `main_branch` | yes | – | Branch reviewers merge into and worktrees branch from. |
-| `test_gate` | yes | – | Shell commands run from the worktree root; all must exit 0. `[]` means no gate. |
+| `config_version` | yes | none | Must be `1`. |
+| `main_branch` | yes | none | Branch reviewers merge into and worktrees branch from. |
+| `test_gate` | yes | none | Shell commands run from the worktree root; all must exit 0. `[]` means no gate. |
 | `specs_dir` | no | unset | Where specs live. Unset → the planner role is disabled and `plan` issues are skipped. |
 | `plans_dir` | no | unset | Where plans live. Required when `specs_dir` is set; may be set without it. |
 | `builders` | no | 2 | Builder slots (implementer or planner). |
@@ -105,7 +105,7 @@ Fixed conventions: worktrees at `.worktrees/<id>` (add `.worktrees/` to `.gitign
 
 Users who installed from GitHub get a new copy only when `version` in `.claude-plugin/plugin.json` changes; commits pushed without a version bump do not reach them. To release:
 
-1. Bump `version` in `.claude-plugin/plugin.json` (semver). Do not add `version` to the plugin entry in `marketplace.json` — `plugin.json` wins and `claude plugin validate` flags the mismatch.
+1. Bump `version` in `.claude-plugin/plugin.json` (semver). Do not add `version` to the plugin entry in `marketplace.json`: `plugin.json` wins and `claude plugin validate` flags the mismatch.
 2. Optionally tag the commit, e.g. `git tag v0.2.0 && git push --tags`. Claude Code does not need tags or GitHub releases; a tag only lets users pin a version with `claude plugin marketplace add madic-creates/td-orchestrator#v0.2.0`.
 
 `metadata.version` in `marketplace.json` versions the catalog, not the plugin, and plays no part in updates. Installs from a local marketplace directory ignore `version` entirely.

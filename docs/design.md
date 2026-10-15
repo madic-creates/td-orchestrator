@@ -1,4 +1,4 @@
-# td-orchestrator – Design
+# td-orchestrator: Design
 
 - **Date:** 2026-10-15
 - **td issue:** td-b470d9 (epic td-739c0f, tracked in the `game` repo)
@@ -44,7 +44,7 @@ td-orchestrator/
 ```
 
 **Install, once per machine:** `claude plugin marketplace add /home/mne-adm/Git/personal/github.com/claude-orchestrator` (or the GitHub repo).
-**Enable, once per repo:** install the plugin with project scope, which writes `enabledPlugins` into the repo's committed `.claude/settings.json`, so `/td-orchestrator:orchestrate` is available to everyone working in the repo. The wizard checks this and offers to do it. Worker agents do **not** depend on it: the orchestrator starts every worker with `--plugin-dir <PLUGIN_ROOT>` (its own plugin root), because worktrees of branches created before the settings commit would not contain the entry (revised 2026-10-15 after the plugin branch review).
+**Enable, once per repo:** install the plugin with project scope, which writes `enabledPlugins` into the repo's committed `.claude/settings.json`, so `/td-orchestrator:orchestrate` is available to everyone working in the repo. The wizard checks this and offers to do it. Worker agents do **not** depend on it. The orchestrator starts every worker with `--plugin-dir <PLUGIN_ROOT>` (its own plugin root), because worktrees of branches created before the settings commit would not contain the entry. This was revised on 2026-10-15 after the plugin branch review.
 
 **Dependencies** (checked as preconditions, listed in the README): Herdr (`HERDR_ENV=1`, `herdr` CLI), `td`, `git`, `jq`, Claude Code auto mode, the superpowers plugin (a note, not a stop).
 
@@ -78,9 +78,9 @@ Run `godot --headless --import` first in a fresh worktree.
 
 | Key | Required | Default | Meaning |
 |---|---|---|---|
-| `config_version` | yes | – | Must be `1`. Any other value triggers the wizard. |
-| `main_branch` | yes | – | Branch that reviewers merge into and worktrees branch from. |
-| `test_gate` | yes | – | List of shell commands, run from the worktree root. All must exit 0. `[]` is allowed only after explicit confirmation in the wizard. |
+| `config_version` | yes | none | Must be `1`. Any other value triggers the wizard. |
+| `main_branch` | yes | none | Branch that reviewers merge into and worktrees branch from. |
+| `test_gate` | yes | none | List of shell commands, run from the worktree root. All must exit 0. `[]` is allowed only after explicit confirmation in the wizard. |
 | `specs_dir` | no | unset | Where specs live. Unset → the planner role is disabled; `plan` issues are skipped and reported as not workable. `plans_dir` may still be set, so implementers find plans. |
 | `plans_dir` | no | unset | Where plans live. Required when `specs_dir` is set. |
 | `builders` | no | 2 | Builder slots. `--builders N` overrides. |
@@ -124,7 +124,7 @@ The wizard is the only part of the orchestrator that talks to the user directly,
 
 Behaviour is v1's, with these changes:
 
-- **Preconditions**, in order: `<MAIN_REPO>` from `git rev-parse --show-toplevel` and `<PLUGIN_ROOT>` from the skill's base directory; inside Herdr; `td`, `herdr` and `jq` on `PATH`; valid config (otherwise the wizard — after the Herdr check, so the wizard never runs for a run that could not start); notes (not stops) if the project's `.claude/settings.json` does not enable the plugin or the superpowers plugin is not found; current branch is `<MAIN_BRANCH>`; main working tree clean; `herdr status`. `--setup` needs only the first step. A dry run without Herdr reports that, assumes no live agents and still lists the queue.
+- **Preconditions**, in order: `<MAIN_REPO>` from `git rev-parse --show-toplevel` and `<PLUGIN_ROOT>` from the skill's base directory; inside Herdr; `td`, `herdr` and `jq` on `PATH`; valid config (otherwise the wizard; it runs after the Herdr check, so it never runs for a run that could not start); notes (not stops) if the project's `.claude/settings.json` does not enable the plugin or the superpowers plugin is not found; current branch is `<MAIN_BRANCH>`; main working tree clean; `herdr status`. `--setup` needs only the first step. A dry run without Herdr reports that, assumes no live agents and still lists the queue.
 - Every hard-coded `main` becomes `<MAIN_BRANCH>`. Like `<MAIN_REPO>`, it is written as a literal into every command.
 - Slots and budgets come from the config; `--builders` / `--reviewers` override slots.
 - `MODE=main` reviews exist only with `legacy_main_mode: true`. Otherwise an `in_review` issue without a `td/<id>` branch is reported as not workable (`no branch`).
