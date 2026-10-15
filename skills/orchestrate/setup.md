@@ -1,6 +1,6 @@
 # Setup wizard
 
-Creates or completes `<MAIN_REPO>/.claude/orchestrator.md`. You run this before any agent starts, so here — and only here — you talk to the user, always through `AskUserQuestion`. Never run the test gate, never start agents.
+Creates or completes `<MAIN_REPO>/.claude/orchestrator.md`. You run this before any agent starts, so here, and only here, you talk to the user, always through `AskUserQuestion`. Never run the test gate, never start agents.
 
 The template is `templates/orchestrator.md` in the plugin root, two directories above this file (`<this skill's base directory>/../../templates/orchestrator.md`).
 
@@ -24,12 +24,12 @@ For every key without a valid existing value (all keys when the file is missing)
 
 ## 2. Confirm with the user
 
-One `AskUserQuestion` call with up to four questions; the detected value is always the first option, labelled `<value> (Detected)`. Offer plausible alternatives as further options; "Other" is always available for free input. Every question needs at least two options (the tool rejects a single one), so never drop a question for lack of alternatives — add the fallback named below.
+One `AskUserQuestion` call with up to four questions; the detected value is always the first option, labelled `<value> (Detected)`. Offer plausible alternatives as further options; "Other" is always available for free input. Every question needs at least two options (the tool rejects a single one), so never drop a question for lack of alternatives; add the fallback named below.
 
-1. **Main branch** — detected branch, other local branches (`git -C <MAIN_REPO> branch --format='%(refname:short)'`, at most two more). If there is no other local branch, add `main` or `master` (whichever was not detected) as the second option.
-2. **Test gate** — detected commands joined with ` && ` as one option; single commands as further options; option `No test gate ([])` with the description "Agents hand over and merge without running any tests". If the user picks `[]`, confirm it once more in a separate question before accepting.
-3. **Specs and plans** — detected pair `specs: <dir>, plans: <dir>`; option `No planner (no specs_dir)`, with the description "plans_dir stays set if a plans directory was detected, so implementers still find plans". Without a planner, `plans_dir` keeps the detected or existing value, if any.
-4. **Remaining settings** — `Keep current (<builders> builders, <reviewers> reviewer(s), budgets <i>/<r>/<p> min, legacy_main_mode <value>)`, filled with the existing values where valid and the detected defaults otherwise, or `Change`. On `Change`, ask a second call for `builders`, `reviewers`, `legacy_main_mode`; budgets are changed by editing the file.
+1. **Main branch:** detected branch, other local branches (`git -C <MAIN_REPO> branch --format='%(refname:short)'`, at most two more). If there is no other local branch, add `main` or `master` (whichever was not detected) as the second option.
+2. **Test gate:** detected commands joined with ` && ` as one option; single commands as further options; option `No test gate ([])` with the description "Agents hand over and merge without running any tests". If the user picks `[]`, confirm it once more in a separate question before accepting.
+3. **Specs and plans:** detected pair `specs: <dir>, plans: <dir>`; option `No planner (no specs_dir)`, with the description "plans_dir stays set if a plans directory was detected, so implementers still find plans". Without a planner, `plans_dir` keeps the detected or existing value, if any.
+4. **Remaining settings:** `Keep current (<builders> builders, <reviewers> reviewer(s), budgets <i>/<r>/<p> min, legacy_main_mode <value>)`, filled with the existing values where valid and the detected defaults otherwise, or `Change`. On `Change`, ask a second call for `builders`, `reviewers`, `legacy_main_mode`; budgets are changed by editing the file.
 
 If the user's free input for the test gate contains several commands, split them on ` && ` or newlines into list items.
 
@@ -67,7 +67,7 @@ If the file existed, keep its role sections' content unchanged and replace only 
 
 First check the branch: `git -C <MAIN_REPO> rev-parse --abbrev-ref HEAD` must print the confirmed `main_branch`. If it does not, tell the user which branch is checked out, leave the files uncommitted and stop.
 
-Ask: "Commit these files on `<MAIN_BRANCH>`?" listing `.claude/orchestrator.md` and, if changed, `.gitignore` and `.claude/settings.json`. On yes, add and commit exactly those files — the pathspec keeps anything else the user had staged out of the commit:
+Ask: "Commit these files on `<MAIN_BRANCH>`?" listing `.claude/orchestrator.md` and, if changed, `.gitignore` and `.claude/settings.json`. On yes, add and commit exactly those files. The pathspec keeps anything else the user had staged out of the commit:
 
 ```bash
 git -C <MAIN_REPO> add .claude/orchestrator.md

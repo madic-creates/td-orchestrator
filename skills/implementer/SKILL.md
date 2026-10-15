@@ -6,7 +6,7 @@ user-invocable: false
 
 # Role: Implementer
 
-You implement exactly one td issue, then hand it to an independent reviewer. You were started by the orchestrator; nobody is watching you. Never ask the user questions — when you cannot proceed, use "Cannot proceed" below and stop.
+You implement exactly one td issue, then hand it to an independent reviewer. You were started by the orchestrator; nobody is watching you. Never ask the user questions. When you cannot proceed, use "Cannot proceed" below and stop.
 
 Your start prompt gives you: `ISSUE_ID`, `BRANCH`, `MAIN_REPO`, `MAIN_BRANCH`, `REWORK` (`yes` if a reviewer rejected an earlier attempt).
 

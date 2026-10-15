@@ -1,6 +1,6 @@
 ---
 name: orchestrate
-description: Run the td-orchestrator — works through all workable td issues of this repo by starting fresh implementer, reviewer and planner agents in Herdr tabs and git worktrees. Use when the user types /td-orchestrator:orchestrate or /orchestrate (optionally --dry-run, --setup, --builders N, --reviewers M).
+description: Run the td-orchestrator. It works through all workable td issues of this repo by starting fresh implementer, reviewer and planner agents in Herdr tabs and git worktrees. Use when the user types /td-orchestrator:orchestrate or /orchestrate (optionally --dry-run, --setup, --builders N, --reviewers M).
 ---
 
 # Orchestrator
@@ -24,26 +24,26 @@ Design: `docs/design.md` in the td-orchestrator plugin repository.
 
 ## Config
 
-Read `<MAIN_REPO>/.claude/orchestrator.md` and parse its YAML frontmatter. It is **valid** when it parses, `config_version` is `1`, `main_branch` is a non-empty string, `test_gate` is a list of strings (possibly empty), `plans_dir` is set whenever `specs_dir` is set, and every optional key that is set has the right type: `builders` and `reviewers` integers ≥ 1, `budgets` a map whose keys are among `implementer`, `reviewer`, `planner` and whose values are numbers > 0 (missing roles take their default), `legacy_main_mode` a boolean, `specs_dir` and `plans_dir` non-empty strings. A wrong type or range makes the config invalid, like a missing required key. For every unknown key, print one line `warning: unknown key <key> in .claude/orchestrator.md` and ignore it — an unknown key never stands in for a required one (`test-gate` does not count as `test_gate`). Defaults for unset optional keys: `builders` 2, `reviewers` 1, `budgets` implementer 90 / reviewer 45 / planner 60 minutes, `legacy_main_mode` false, `specs_dir`/`plans_dir` unset.
+Read `<MAIN_REPO>/.claude/orchestrator.md` and parse its YAML frontmatter. It is **valid** when it parses, `config_version` is `1`, `main_branch` is a non-empty string, `test_gate` is a list of strings (possibly empty), `plans_dir` is set whenever `specs_dir` is set, and every optional key that is set has the right type: `builders` and `reviewers` integers ≥ 1, `budgets` a map whose keys are among `implementer`, `reviewer`, `planner` and whose values are numbers > 0 (missing roles take their default), `legacy_main_mode` a boolean, `specs_dir` and `plans_dir` non-empty strings. A wrong type or range makes the config invalid, like a missing required key. For every unknown key, print one line `warning: unknown key <key> in .claude/orchestrator.md` and ignore it. An unknown key never stands in for a required one (`test-gate` does not count as `test_gate`). Defaults for unset optional keys: `builders` 2, `reviewers` 1, `budgets` implementer 90 / reviewer 45 / planner 60 minutes, `legacy_main_mode` false, `specs_dir`/`plans_dir` unset.
 
 Remember `<MAIN_BRANCH>` = `main_branch`, the slot counts (after `--builders`/`--reviewers`), the budgets, `legacy_main_mode`, and whether `specs_dir` is set (**planner enabled**).
 
 ## Preconditions
 
 1. `git rev-parse --show-toplevel` → remember the printed path as `<MAIN_REPO>`. If it is inside a `.worktrees/` directory, say the orchestrator must run in the main working tree and stop. Then `realpath <this skill's base directory>/../..` → remember it as `<PLUGIN_ROOT>`, the plugin's own root directory. Every worker agent is started with `--plugin-dir <PLUGIN_ROOT>`, so it finds its role skill no matter which settings its worktree's branch contains.
-2. `test "${HERDR_ENV:-}" = 1` — otherwise say you are not inside Herdr and stop. This comes before the config check, so the wizard never runs for a run that could not start anyway.
-3. `command -v td`, `command -v herdr`, `command -v jq` — each must print a path.
+2. `test "${HERDR_ENV:-}" = 1`. Otherwise say you are not inside Herdr and stop. This comes before the config check, so the wizard never runs for a run that could not start anyway.
+3. `command -v td`, `command -v herdr`, `command -v jq`: each must print a path.
 4. Config: if the file is missing or not valid (see "Config"): with `--dry-run`, list the missing or invalid keys and stop; otherwise read `setup.md` in this skill's base directory and follow it, then re-read the config. If it is still not valid, stop.
 5. If `<MAIN_REPO>/.claude/settings.json` does not enable `td-orchestrator@td-orchestrator`, print one line `note: td-orchestrator is not enabled for this project (run --setup to enable it)` and continue. This is not a blocker: workers get the plugin through `--plugin-dir <PLUGIN_ROOT>`.
 6. If `claude plugin list` shows no enabled plugin named `superpowers@…`, print one line `note: superpowers plugin not found; implementers and planners need it` and continue (it may be installed in a way the list does not show).
 7. `git -C <MAIN_REPO> rev-parse --abbrev-ref HEAD` must print `<MAIN_BRANCH>`.
-8. `git -C <MAIN_REPO> status --porcelain` must print nothing — reviewers refuse to merge into a dirty main working tree. Otherwise notify the user with the paths and stop.
+8. `git -C <MAIN_REPO> status --porcelain` must print nothing, because reviewers refuse to merge into a dirty main working tree. Otherwise notify the user with the paths and stop.
 9. `echo $HERDR_WORKSPACE_ID` → remember it as `<ORCH_WS>`, your own workspace. Every agent gets its own tab there, so the user sees all agents in one place.
 10. `herdr status` once.
 
 ## Dry run (`--dry-run`)
 
-Report failed preconditions 2, 3 and 5–10 instead of stopping (precondition 4 is handled as described there). Without a working Herdr (precondition 2 or 3 failed, or `herdr agent list` fails), say so, assume there are no live agents and skip every `herdr` command. Do "Resume" and "Choose the next action" read-only, then print which agents you would start right now to fill the slots, followed by the ordered queue of the remaining workable issues (role, issue, mode, worktree create/reuse), plus the issues you would skip and why. Start nothing, change nothing, write no files, then stop.
+Report failed preconditions 2, 3 and 5 to 10 instead of stopping (precondition 4 is handled as described there). Without a working Herdr (precondition 2 or 3 failed, or `herdr agent list` fails), say so, assume there are no live agents and skip every `herdr` command. Do "Resume" and "Choose the next action" read-only, then print which agents you would start right now to fill the slots, followed by the ordered queue of the remaining workable issues (role, issue, mode, worktree create/reuse), plus the issues you would skip and why. Start nothing, change nothing, write no files, then stop.
 
 ## Slots
 
@@ -107,7 +107,7 @@ herdr agent start <name> --kind claude --pane <root pane of that tab> --timeout 
 ```
 One tab per agent; the tab label is the agent name. After a restart, `herdr agent list` gives each agent's `tab_id`. Then log `orchestrator: started <name>`. If the pane is not yet an available shell, `herdr pane wait-output <pane> --regex '[$%#>❯] ?$' --timeout 10000` and retry once. `agent_not_ready` → read the screen (`herdr agent read <name> --source visible --lines 40`): the folder-trust dialog → "Folder-trust dialog"; anything else → "Agent blocked" (the start prompt is sent later by "Resume" step 1).
 
-Start prompt — always exactly this one line, built only from IDs and paths:
+Start prompt, always exactly this one line, built only from IDs and paths:
 ```
 Use skill td-orchestrator:<implementer|reviewer|planner>. ISSUE_ID=<id> BRANCH=td/<id> MAIN_REPO=<MAIN_REPO> MAIN_BRANCH=<MAIN_BRANCH> MODE=<worktree|main> REWORK=<yes|no>
 ```
@@ -116,7 +116,7 @@ Send it without waiting for completion, then confirm the agent picked it up (Bas
 herdr agent prompt <name> "<start prompt>"
 herdr agent wait <name> --until working --until blocked --timeout 30000
 ```
-Once `agent prompt` reports the submission, log `orchestrator: prompted <name>` — its timestamp is the agent's start time. `blocked` → "Agent blocked". A timeout here does not prove the prompt was lost: check `herdr agent get` and read the screen; never resend blindly.
+Once `agent prompt` reports the submission, log `orchestrator: prompted <name>`. Its timestamp is the agent's start time. `blocked` → "Agent blocked". A timeout here does not prove the prompt was lost: check `herdr agent get` and read the screen; never resend blindly.
 
 ## Folder-trust dialog (the only dialog you may answer)
 
@@ -154,9 +154,9 @@ To read an agent's output use `herdr agent read <name> --source visible --lines 
 - implementer/planner: expected status `in_review`, or label `needs-human`.
 - reviewer: expected `closed`, or rejected (status `open`, newest log starts with `Rejected:`), or label `needs-human` on an issue that is not `closed`.
 
-Expected → close the agent's tab (`herdr tab close <tab>`) and continue. If the reviewer closed the issue in `MODE=worktree`: remove the worktree (`git -C <MAIN_REPO> worktree remove <MAIN_REPO>/.worktrees/<id>`) and, as a separate command, delete the branch only if it is merged (`git -C <MAIN_REPO> branch -d td/<id>`; `-d` refuses unmerged branches — if it refuses, log it and leave it). If a closed issue still carries the label `needs-human`, remove it (`td update <id> --labels <existing labels minus needs-human>`), so closed issues never show up as needing the user.
+Expected → close the agent's tab (`herdr tab close <tab>`) and continue. If the reviewer closed the issue in `MODE=worktree`: remove the worktree (`git -C <MAIN_REPO> worktree remove <MAIN_REPO>/.worktrees/<id>`) and, as a separate command, delete the branch only if it is merged (`git -C <MAIN_REPO> branch -d td/<id>`; `-d` refuses unmerged branches; if it refuses, log it and leave it). If a closed issue still carries the label `needs-human`, remove it (`td update <id> --labels <existing labels minus needs-human>`), so closed issues never show up as needing the user.
 
-Label `needs-human` appeared (issue not `closed`) → notify (`herdr notification show "Orchestrator: needs you" --body "<id> — see td comments" --sound request`), close the tab, continue. If the agent was an implementer or planner, the issue is `open` and `git -C <MAIN_REPO> branch --list --merged <MAIN_BRANCH> td/<id>` prints something (the branch has no commits of its own), clean up: remove the worktree (`git -C <MAIN_REPO> worktree remove <MAIN_REPO>/.worktrees/<id>`) and, only if that succeeded, as a separate command `git -C <MAIN_REPO> branch -d td/<id>`; log `td log -i <id> "orchestrator: removed empty worktree and branch td/<id>"`. `worktree remove` without `--force` refuses a worktree with uncommitted changes — if it refuses, log it and leave both. A branch with commits stays as it is.
+Label `needs-human` appeared (issue not `closed`) → notify (`herdr notification show "Orchestrator: needs you" --body "<id>: see td comments" --sound request`), close the tab, continue. If the agent was an implementer or planner, the issue is `open` and `git -C <MAIN_REPO> branch --list --merged <MAIN_BRANCH> td/<id>` prints something (the branch has no commits of its own), clean up: remove the worktree (`git -C <MAIN_REPO> worktree remove <MAIN_REPO>/.worktrees/<id>`) and, only if that succeeded, as a separate command `git -C <MAIN_REPO> branch -d td/<id>`; log `td log -i <id> "orchestrator: removed empty worktree and branch td/<id>"`. `worktree remove` without `--force` refuses a worktree with uncommitted changes. If it refuses, log it and leave both. A branch with commits stays as it is.
 
 Unexpected (status unchanged) and no `orchestrator: follow-up <name>` log line yet → send one follow-up prompt (as in "Start an agent", without waiting for completion), repeating the full start prompt: `Your td workflow for <id> is not finished (status <status>). <start prompt>`, and log `orchestrator: follow-up <name>`. The agent stays active and keeps its slot. Still unexpected after the follow-up → "Failed attempt" with reason `workflow not completed (status <status>)`.
 
@@ -174,7 +174,7 @@ Do not send keys or answers. `herdr agent read <name> --source visible --lines 6
 ```bash
 td log -i <id> --blocker "orchestrator: agent <name> blocked: <one-line summary of the dialog>"
 td update <id> --labels <existing labels plus agent-blocked>
-herdr notification show "Orchestrator: agent waiting" --body "<name> (<id>) waits at a prompt — answer it in its tab" --sound request
+herdr notification show "Orchestrator: agent waiting" --body "<name> (<id>) waits at a prompt, answer it in its tab" --sound request
 ```
 Leave the tab open; its slot is free for other work. "Resume" picks the agent up again once it is no longer `blocked`.
 
@@ -190,14 +190,14 @@ Leave the tab open; its slot is free for other work. "Resume" picks the agent up
 
 ```bash
 td update <id> --labels <existing labels plus stuck>
-td block <id> --reason "orchestrator: 3 failed attempts — see logs; branch td/<id> kept"
+td block <id> --reason "orchestrator: 3 failed attempts, see logs; branch td/<id> kept"
 herdr notification show "Orchestrator: issue stuck" --body "<id>" --sound request
 ```
 `td block` fails for an `in_review` issue; that is fine, the `stuck` label already excludes it. Keep the worktree and branch.
 
 ## End of run
 
-When no slot can be filled and no agent of yours is active (only `agent-blocked` agents may remain): print a summary — issues closed this run, `stuck`, `needs-human`, `agent-blocked` (agents still waiting at a prompt, with their tabs), and what remains open with the reason it is not workable. Then `herdr notification show "Orchestrator: run finished" --body "<n> closed, <n> stuck, <n> need you" --sound done` and stop. Agents waiting at a prompt stay open; the user answers them and runs the orchestrator again, which adopts them.
+When no slot can be filled and no agent of yours is active (only `agent-blocked` agents may remain): print a summary: issues closed this run, `stuck`, `needs-human`, `agent-blocked` (agents still waiting at a prompt, with their tabs), and what remains open with the reason it is not workable. Then `herdr notification show "Orchestrator: run finished" --body "<n> closed, <n> stuck, <n> need you" --sound done` and stop. Agents waiting at a prompt stay open; the user answers them and runs the orchestrator again, which adopts them.
 
 ## Rules
 

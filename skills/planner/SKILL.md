@@ -25,7 +25,7 @@ Read `<MAIN_REPO>/.claude/orchestrator.md`: the frontmatter (`specs_dir`, `plans
    - one epic: `td epic create "<plan title>"`
    - one feature per plan task, titled `P<N>-T<NN> <task name>`, each with `td update <task> --parent <epic>`
    - dependencies between tasks with `td dep add <task> <depends-on>`, mirroring the plan order
-   - every task that has no other dependency depends on the plan issue itself: `td dep add <task> <ISSUE_ID>` — so no task starts before the plan is reviewed and merged into `<MAIN_BRANCH>`
+   - every task that has no other dependency depends on the plan issue itself: `td dep add <task> <ISSUE_ID>`, so no task starts before the plan is reviewed and merged into `<MAIN_BRANCH>`
    - priority: same as `<ISSUE_ID>`
 6. `td log -i <ISSUE_ID> "Plan: <path>; epic <epic-id>; tasks <ids>"`, `td handoff ...`, `td review <ISSUE_ID>`.
 7. Reply `DONE <ISSUE_ID>` and stop.
