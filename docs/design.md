@@ -2,7 +2,7 @@
 
 - **Date:** 2026-10-15
 - **td issue:** td-b470d9 (epic td-739c0f, tracked in the `game` repo)
-- **Status:** draft, awaiting user review
+- **Status:** approved; implemented in td-739c0f (plugin `ac818d1`, `game` migration `5b1d404`)
 - **Supersedes:** `game/docs/superpowers/specs/2026-10-14-agent-orchestrator-design.md` (the repo-specific v1)
 
 ## Goal
@@ -112,7 +112,7 @@ With `--dry-run` the wizard does not run: the dry run reports which keys are mis
    - Existing config values, if the file exists but is incomplete, are kept as the first proposal.
 2. **Confirm** each value with the user via `AskUserQuestion`: detected value first ("(Detected)"), plausible alternatives, "Other" for free input. Up to four questions per call; optional keys with a default are asked in one final "keep defaults?" question.
 3. **Check** the `test_gate` commands: each command's first word must resolve (`command -v`, or an executable file relative to the repo root). A failing check is shown to the user, who corrects or confirms it. The wizard never runs the test gate.
-4. **`.gitignore`:** if `.worktrees/` is not ignored (`git check-ignore -q .worktrees/x`), offer to append it.
+4. **`.gitignore`:** if `.worktrees/` is not ignored (`git check-ignore -q .worktrees/x`), offer to append it. Declining stops the wizard: untracked worktrees would block every merge.
 5. **Plugin enabled for the project:** if `.claude/settings.json` does not enable `td-orchestrator@td-orchestrator`, offer to add it (merging with existing content).
 6. **Write** `.claude/orchestrator.md` from `templates/orchestrator.md` with the confirmed values and empty role sections, then show the result.
 7. **Commit** the changed files on `main_branch` after the user's OK (`chore: td-orchestrator config`, no td suffix required). The run needs a clean main working tree, so a declined commit ends the run with that explanation.
