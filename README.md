@@ -100,3 +100,12 @@ Fixed conventions: worktrees at `.worktrees/<id>` (add `.worktrees/` to `.gitign
 ## Development
 
 `./scripts/check.sh` is the test gate: manifest validation, skill presence, template schema, and no project-specific terms in `skills/` and `templates/`. It needs the `claude` CLI, `jq` and `python3` with PyYAML. `./scripts/make-fixture.sh <dir>` creates a throwaway git + td repository for trying the setup wizard.
+
+### Releasing
+
+Users who installed from GitHub get a new copy only when `version` in `.claude-plugin/plugin.json` changes; commits pushed without a version bump do not reach them. To release:
+
+1. Bump `version` in `.claude-plugin/plugin.json` (semver). Do not add `version` to the plugin entry in `marketplace.json` — `plugin.json` wins and `claude plugin validate` flags the mismatch.
+2. Optionally tag the commit, e.g. `git tag v0.2.0 && git push --tags`. Claude Code does not need tags or GitHub releases; a tag only lets users pin a version with `claude plugin marketplace add madic-creates/claude-orchestrator#v0.2.0`.
+
+`metadata.version` in `marketplace.json` versions the catalog, not the plugin, and plays no part in updates. Installs from a local marketplace directory ignore `version` entirely.
