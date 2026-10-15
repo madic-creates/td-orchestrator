@@ -56,5 +56,25 @@ for section in ["## Implementer", "## Reviewer", "## Planner"]:
 PY
 fi
 
+# skills: present, frontmatter name matches directory
+for s in orchestrate implementer reviewer planner; do
+	f="skills/$s/SKILL.md"
+	if [ ! -f "$f" ]; then err "missing $f"; continue; fi
+	head -5 "$f" | grep -qx "name: $s" || err "$f: frontmatter name must be $s"
+done
+[ -d skills ] && {
+	out=$(claude plugin validate skills 2>&1) || err "skills invalid"
+	echo "$out" | grep -qi 'warning' && { echo "$out"; err "skills have warnings"; }
+}
+
+# no project-specific terms in shipped skill/template files
+banned='godot|gdscript|\bGUT\b|\.uid\b|run_tests|smoke\.sh|superpowers/(specs|plans)|horde|\bgame\b'
+hits=$(grep -rniE "$banned" skills templates 2>/dev/null)
+[ -z "$hits" ] || { echo "$hits"; err "project-specific terms in skills/templates"; }
+
+# the main branch is never hard-coded in git commands
+hits=$(grep -rnE 'git [^`]*\b(main|master)\b' skills 2>/dev/null)
+[ -z "$hits" ] || { echo "$hits"; err "hard-coded main/master in git commands (use <MAIN_BRANCH>)"; }
+
 [ "$fail" = 0 ] && echo "check.sh: all green"
 exit "$fail"
