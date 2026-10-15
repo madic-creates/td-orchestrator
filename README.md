@@ -28,7 +28,10 @@ claude plugin install td-orchestrator@td-orchestrator --scope project
 
 The setup wizard offers this step if it is missing.
 
-After changing the plugin source: `claude plugin marketplace update td-orchestrator` and `claude plugin update td-orchestrator@td-orchestrator`, then restart Claude Code.
+Picking up plugin changes depends on how the marketplace was added:
+
+- **Local directory** (`marketplace add /path/to/claude-orchestrator`): the plugin is read straight from that folder, so edits take effect at the next session start or after `/reload-plugins`. `claude plugin update` has nothing to do here.
+- **GitHub** (`marketplace add madic-creates/claude-orchestrator`): run `claude plugin marketplace update td-orchestrator` and `claude plugin update td-orchestrator@td-orchestrator`, then restart Claude Code.
 
 ## Usage
 
