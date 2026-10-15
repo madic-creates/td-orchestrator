@@ -86,5 +86,18 @@ if [ -f "$o" ]; then
 	done
 fi
 
+# wizard: present and covers every step
+w=skills/orchestrate/setup.md
+if [ ! -f "$w" ]; then
+	err "missing $w"
+else
+	for needle in 'AskUserQuestion' '(Detected)' 'test_gate' 'command -v' 'check-ignore' \
+		'.worktrees/' 'claude plugin install td-orchestrator@td-orchestrator --scope project' \
+		'templates/orchestrator.md' 'chore: td-orchestrator config' 'unknown key' '[]'; do
+		grep -qF -- "$needle" "$w" || err "$w lacks: $needle"
+	done
+fi
+[ -x scripts/make-fixture.sh ] || err "missing executable scripts/make-fixture.sh"
+
 [ "$fail" = 0 ] && echo "check.sh: all green"
 exit "$fail"
