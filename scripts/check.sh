@@ -41,6 +41,7 @@ fill = {
 	"{{builders}}": "2",
 	"{{reviewers}}": "1",
 	"{{legacy_main_mode}}": "false",
+	"{{budgets}}": "{ implementer: 90, reviewer: 45, planner: 60 }",
 }
 for k, v in fill.items():
 	assert k in fm, f"placeholder {k} missing"
@@ -81,7 +82,8 @@ o=skills/orchestrate/SKILL.md
 if [ -f "$o" ]; then
 	for needle in 'Use skill td-orchestrator:' 'setup.md' '--setup' '--dry-run' \
 		'legacy_main_mode' 'specs_dir' 'td-orchestrator@td-orchestrator' \
-		'unknown key' '<MAIN_BRANCH>' 'orchestrator: prompted' 'agent-blocked'; do
+		'unknown key' '<MAIN_BRANCH>' 'orchestrator: prompted' 'agent-blocked' \
+		'--plugin-dir <PLUGIN_ROOT>' '<PLUGIN_ROOT>'; do
 		grep -qF -- "$needle" "$o" || err "$o lacks: $needle"
 	done
 fi
@@ -93,7 +95,9 @@ if [ ! -f "$w" ]; then
 else
 	for needle in 'AskUserQuestion' '(Detected)' 'test_gate' 'command -v' 'check-ignore' \
 		'.worktrees/' 'claude plugin install td-orchestrator@td-orchestrator --scope project' \
-		'templates/orchestrator.md' 'chore: td-orchestrator config' 'unknown key' '[]' 'at least two options'; do
+		'templates/orchestrator.md' 'chore: td-orchestrator config' 'unknown key' '[]' 'at least two options' \
+		'For every key without a valid existing value' 'Keep current' '{{budgets}}' \
+		'commit -m "chore: td-orchestrator config" --' 'rev-parse --abbrev-ref HEAD'; do
 		grep -qF -- "$needle" "$w" || err "$w lacks: $needle"
 	done
 fi

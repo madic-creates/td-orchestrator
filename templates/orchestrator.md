@@ -12,7 +12,7 @@ plans_dir: {{plans_dir}}
 builders: {{builders}}
 reviewers: {{reviewers}}
 # Minutes per agent attempt; one extension of the same length is granted.
-budgets: { implementer: 90, reviewer: 45, planner: 60 }
+budgets: {{budgets}}
 # true: in_review issues without a td/<id> branch are reviewed on the main branch.
 legacy_main_mode: {{legacy_main_mode}}
 ---

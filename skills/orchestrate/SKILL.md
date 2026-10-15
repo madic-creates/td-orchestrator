@@ -18,7 +18,7 @@ Design: `docs/design.md` in the td-orchestrator plugin repository.
 ## Shell rules
 
 - Run each `herdr`/`td`/`git` command as its own Bash call (no long `&&` chains); auto mode rejects compound commands more readily.
-- Shell variables do not survive between Bash calls. Determine `MAIN_REPO` and `MAIN_BRANCH` once (Preconditions) and write the **literal values** into every later command. Below, `<MAIN_REPO>` and `<MAIN_BRANCH>` mean those literals.
+- Shell variables do not survive between Bash calls. Determine `MAIN_REPO`, `MAIN_BRANCH` and `PLUGIN_ROOT` once (Preconditions) and write the **literal values** into every later command. Below, `<MAIN_REPO>`, `<MAIN_BRANCH>` and `<PLUGIN_ROOT>` mean those literals.
 - Every wait command (`agent prompt --wait`, `agent wait`, `pane wait-output`) gets the Bash tool parameter `timeout: 600000`; the Bash default of 2 minutes would cut it off.
 - Never paste free text from td (rejection reasons, comments, titles) into a command line. Backticks and quotes in it would be executed by your shell.
 
@@ -30,11 +30,11 @@ Remember `<MAIN_BRANCH>` = `main_branch`, the slot counts (after `--builders`/`-
 
 ## Preconditions
 
-1. `git rev-parse --show-toplevel` → remember the printed path as `<MAIN_REPO>`. If it is inside a `.worktrees/` directory, say the orchestrator must run in the main working tree and stop.
+1. `git rev-parse --show-toplevel` → remember the printed path as `<MAIN_REPO>`. If it is inside a `.worktrees/` directory, say the orchestrator must run in the main working tree and stop. Then `realpath <this skill's base directory>/../..` → remember it as `<PLUGIN_ROOT>`, the plugin's own root directory. Every worker agent is started with `--plugin-dir <PLUGIN_ROOT>`, so it finds its role skill no matter which settings its worktree's branch contains.
 2. Config: if the file is missing or not valid (see "Config"): with `--dry-run`, list the missing or invalid keys and stop; otherwise read `setup.md` in this skill's base directory and follow it, then re-read the config. If it is still not valid, stop.
 3. `test "${HERDR_ENV:-}" = 1` — otherwise say you are not inside Herdr and stop.
 4. `command -v td`, `command -v herdr` — both must print a path.
-5. `<MAIN_REPO>/.claude/settings.json` must enable `td-orchestrator@td-orchestrator` (`enabledPlugins` entry `true`). Otherwise worker agents in worktrees would not find their role skills: run the wizard's step "Plugin enabled for the project" (in `setup.md`), and stop if the user declines.
+5. If `<MAIN_REPO>/.claude/settings.json` does not enable `td-orchestrator@td-orchestrator`, print one line `note: td-orchestrator is not enabled for this project (run --setup to enable it)` and continue. This is not a blocker: workers get the plugin through `--plugin-dir <PLUGIN_ROOT>`.
 6. `git -C <MAIN_REPO> rev-parse --abbrev-ref HEAD` must print `<MAIN_BRANCH>`.
 7. `git -C <MAIN_REPO> status --porcelain` must print nothing — reviewers refuse to merge into a dirty main working tree. Otherwise notify the user with the paths and stop.
 8. `echo $HERDR_WORKSPACE_ID` → remember it as `<ORCH_WS>`, your own workspace. Every agent gets its own tab there, so the user sees all agents in one place.
@@ -102,7 +102,7 @@ Names: `impl-<id without td->`, `rev-<...>`, `plan-<...>`.
 
 ```bash
 herdr tab create --workspace <ORCH_WS> --cwd <worktree path or MAIN_REPO> --label <name> --no-focus   # .result.tab.tab_id and .result.root_pane.pane_id
-herdr agent start <name> --kind claude --pane <root pane of that tab> --timeout 60000 -- --permission-mode auto
+herdr agent start <name> --kind claude --pane <root pane of that tab> --timeout 60000 -- --permission-mode auto --plugin-dir <PLUGIN_ROOT>
 ```
 One tab per agent; the tab label is the agent name. After a restart, `herdr agent list` gives each agent's `tab_id`. Then log `orchestrator: started <name>`. If the pane is not yet an available shell, `herdr pane wait-output <pane> --regex '[$%#>❯] ?$' --timeout 10000` and retry once. `agent_not_ready` → read the screen (`herdr agent read <name> --source visible --lines 40`): the folder-trust dialog → "Folder-trust dialog"; anything else → "Agent blocked" (the start prompt is sent later by "Resume" step 1).
 

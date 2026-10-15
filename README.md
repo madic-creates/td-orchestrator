@@ -19,7 +19,7 @@ Once per machine:
 claude plugin marketplace add /path/to/claude-orchestrator   # or: madic-creates/claude-orchestrator
 ```
 
-Once per repository (writes `enabledPlugins` into the committed `.claude/settings.json`, so worker agents in worktrees get the plugin too):
+Once per repository (writes `enabledPlugins` into the committed `.claude/settings.json`, so everyone in the repo gets `/td-orchestrator:orchestrate`; worker agents are started with `--plugin-dir` and do not depend on it):
 
 ```bash
 cd /path/to/repo

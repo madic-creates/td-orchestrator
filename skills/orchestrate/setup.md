@@ -8,7 +8,7 @@ The template is `templates/orchestrator.md` in the plugin root, two directories 
 
 If `.claude/orchestrator.md` exists, parse what you can: every valid existing value becomes the first proposal. Report each unknown key as `warning: unknown key <key>` and ask whether it was meant to be one of the known keys (a typo such as `test-gate`); never carry it over silently.
 
-Otherwise detect:
+For every key without a valid existing value (all keys when the file is missing), detect:
 
 - `main_branch`: `git -C <MAIN_REPO> symbolic-ref --short refs/remotes/origin/HEAD` (strip `origin/`); if that fails, `git -C <MAIN_REPO> rev-parse --abbrev-ref HEAD`.
 - `test_gate`, in this order, collecting all hits:
@@ -20,7 +20,7 @@ Otherwise detect:
   6. `Cargo.toml` → `cargo test`. `go.mod` → `go test ./...`.
 - `specs_dir`, `plans_dir`: directories named `specs` and `plans` (prefer siblings under the same parent), excluding `.git/`, `.worktrees/`, `node_modules/`: `find <MAIN_REPO> -type d \( -name specs -o -name plans \) -not -path '*/.git/*' -not -path '*/.worktrees/*' -not -path '*/node_modules/*'`. Store them relative to `<MAIN_REPO>`.
 - `legacy_main_mode`: propose `true` only if `td list --status in_review --json` contains an issue for which `git -C <MAIN_REPO> branch --list td/<id>` prints nothing; otherwise `false`.
-- `builders` 2, `reviewers` 1.
+- `builders` 2, `reviewers` 1, `budgets` `{ implementer: 90, reviewer: 45, planner: 60 }`.
 
 ## 2. Confirm with the user
 
@@ -29,7 +29,7 @@ One `AskUserQuestion` call with up to four questions; the detected value is alwa
 1. **Main branch** — detected branch, other local branches (`git -C <MAIN_REPO> branch --format='%(refname:short)'`, at most two more). If there is no other local branch, add `main` or `master` (whichever was not detected) as the second option.
 2. **Test gate** — detected commands joined with ` && ` as one option; single commands as further options; option `No test gate ([])` with the description "Agents hand over and merge without running any tests". If the user picks `[]`, confirm it once more in a separate question before accepting.
 3. **Specs and plans** — detected pair `specs: <dir>, plans: <dir>`; option `No planner (no specs_dir)`.
-4. **Defaults** — `Keep defaults (2 builders, 1 reviewer, budgets 90/45/60 min, legacy_main_mode <detected>)` or `Change`. On `Change`, ask a second call for `builders`, `reviewers`, `legacy_main_mode`.
+4. **Remaining settings** — `Keep current (<builders> builders, <reviewers> reviewer(s), budgets <i>/<r>/<p> min, legacy_main_mode <value>)`, filled with the existing values where valid and the detected defaults otherwise, or `Change`. On `Change`, ask a second call for `builders`, `reviewers`, `legacy_main_mode`; budgets are changed by editing the file.
 
 If the user's free input for the test gate contains several commands, split them on ` && ` or newlines into list items.
 
@@ -59,18 +59,21 @@ Read the template, replace the placeholders with the confirmed values and write 
 - `{{test_gate}}` → a YAML block list, one `\n  - <command>` per command; `[]` when empty. Quote a command with `"…"` if it contains `: `, `#`, or starts with a YAML special character.
 - `{{specs_dir}}`, `{{plans_dir}}` → the paths; when there is no planner, replace the whole line with `# specs_dir:` / `# plans_dir:` (commented out, i.e. unset).
 - `{{builders}}`, `{{reviewers}}`, `{{legacy_main_mode}}` → the values.
+- `{{budgets}}` → a flow map with all three roles, e.g. `{ implementer: 90, reviewer: 45, planner: 60 }`, keeping existing values.
 
 If the file existed, keep its role sections' content unchanged and replace only the frontmatter. Show the written file to the user.
 
 ## 7. Commit
 
-Ask: "Commit these files on `<MAIN_BRANCH>`?" listing `.claude/orchestrator.md` and, if changed, `.gitignore` and `.claude/settings.json`. On yes:
+First check the branch: `git -C <MAIN_REPO> rev-parse --abbrev-ref HEAD` must print the confirmed `main_branch`. If it does not, tell the user which branch is checked out, leave the files uncommitted and stop.
+
+Ask: "Commit these files on `<MAIN_BRANCH>`?" listing `.claude/orchestrator.md` and, if changed, `.gitignore` and `.claude/settings.json`. On yes, add and commit exactly those files — the pathspec keeps anything else the user had staged out of the commit:
 
 ```bash
 git -C <MAIN_REPO> add .claude/orchestrator.md
-git -C <MAIN_REPO> commit -m "chore: td-orchestrator config"
+git -C <MAIN_REPO> commit -m "chore: td-orchestrator config" -- .claude/orchestrator.md
 ```
-(add `.gitignore` and `.claude/settings.json` to the `git add` if they changed). On no: tell the user the run needs a clean main working tree and stop.
+(append `.gitignore` and `.claude/settings.json` to both commands if they changed). On no: tell the user the run needs a clean main working tree and stop.
 
 ## 8. Done
 

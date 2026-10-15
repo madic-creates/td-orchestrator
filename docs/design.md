@@ -44,7 +44,7 @@ claude-orchestrator/
 ```
 
 **Install, once per machine:** `claude plugin marketplace add /home/mne-adm/Git/personal/github.com/claude-orchestrator` (or the GitHub repo).
-**Enable, once per repo:** install the plugin with project scope, which writes `enabledPlugins` into the repo's committed `.claude/settings.json`. Because that file is committed, every worktree (and therefore every worker agent) has the plugin enabled too. The wizard checks this and offers to do it.
+**Enable, once per repo:** install the plugin with project scope, which writes `enabledPlugins` into the repo's committed `.claude/settings.json`, so `/td-orchestrator:orchestrate` is available to everyone working in the repo. The wizard checks this and offers to do it. Worker agents do **not** depend on it: the orchestrator starts every worker with `--plugin-dir <PLUGIN_ROOT>` (its own plugin root), because worktrees of branches created before the settings commit would not contain the entry (revised 2026-10-15 after the plugin branch review).
 
 **Dependencies** (checked as preconditions, listed in the README): Herdr (`HERDR_ENV=1`, `herdr` CLI), `td`, `git`, Claude Code auto mode, the superpowers plugin.
 
@@ -124,7 +124,7 @@ The wizard is the only part of the orchestrator that talks to the user directly,
 
 Behaviour is v1's, with these changes:
 
-- **Preconditions**, in order: inside Herdr; `td` and `herdr` on `PATH`; `<MAIN_REPO>` from `git rev-parse --show-toplevel`; valid config (otherwise the wizard); plugin enabled in the project's `.claude/settings.json`; current branch is `<MAIN_BRANCH>`; main working tree clean; `herdr status`.
+- **Preconditions**, in order: inside Herdr; `td` and `herdr` on `PATH`; `<MAIN_REPO>` from `git rev-parse --show-toplevel`; valid config (otherwise the wizard); `<PLUGIN_ROOT>` from the skill's base directory; a note (not a stop) if the project's `.claude/settings.json` does not enable the plugin; current branch is `<MAIN_BRANCH>`; main working tree clean; `herdr status`.
 - Every hard-coded `main` becomes `<MAIN_BRANCH>`. Like `<MAIN_REPO>`, it is written as a literal into every command.
 - Slots and budgets come from the config; `--builders` / `--reviewers` override slots.
 - `MODE=main` reviews exist only with `legacy_main_mode: true`. Otherwise an `in_review` issue without a `td/<id>` branch is reported as not workable (`no branch`).
@@ -172,8 +172,8 @@ Unchanged from v1 (attempts, `stuck` after 3, `agent-blocked`, timeouts, follow-
 |---|---|
 | Config missing or invalid | Wizard (interactive run) or report (dry run). |
 | Wizard declined or aborted | Stop without starting agents; say what is missing. |
-| Plugin not enabled for the project | Wizard offers to enable it; if declined, stop: worker agents would not find their role skills. |
-| A worker agent cannot find its role skill | It lands in a state the orchestrator already handles (unexpected outcome → follow-up → failed attempt). The precondition check prevents this case. |
+| Plugin not enabled for the project | One-line note, not a blocker; `--setup` offers to enable it. Workers get the plugin through `--plugin-dir`. |
+| A worker agent cannot find its role skill | It lands in a state the orchestrator already handles (unexpected outcome → follow-up → failed attempt). Starting workers with `--plugin-dir <PLUGIN_ROOT>` prevents this case. |
 
 ## Testing and rollout
 
