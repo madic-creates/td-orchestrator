@@ -288,7 +288,7 @@ Expected: `FAIL: missing templates/orchestrator.md`, exit 1.
 
 ```markdown
 ---
-# claude-orchestrator config. Reference: README.md of the td-orchestrator plugin.
+# td-orchestrator config. Reference: README.md of the td-orchestrator plugin.
 config_version: 1
 # Branch that reviewers merge into and worktrees branch from.
 main_branch: {{main_branch}}
@@ -655,7 +655,7 @@ description: Run the td-orchestrator — works through all workable td issues of
 
 You orchestrate. You start, prompt and monitor other agents and react to the td state they leave behind. You never read or edit code, never run tests, never review work, and never answer an agent's question or permission prompt (single exception: "Folder-trust dialog" below). Commands you run: `herdr`, `td`, read-only `git` (`status`, `branch --list`, `worktree list`, `rev-parse`, `symbolic-ref`, `check-ignore`), plus `git worktree add`, `git worktree remove`, `git branch -d` and `git -C <worktree> rebase --abort` for worktree housekeeping. You may read `<MAIN_REPO>/.claude/orchestrator.md` and `<MAIN_REPO>/.claude/settings.json`. The user is not watching; reach them only through `herdr notification show`. The one exception is the setup wizard, which runs before any agent starts.
 
-Design: `docs/design.md` in the claude-orchestrator plugin repository.
+Design: `docs/design.md` in the td-orchestrator plugin repository.
 
 ## Arguments
 
@@ -1146,7 +1146,7 @@ Create `.claude/orchestrator.md`:
 
 ```markdown
 ---
-# claude-orchestrator config. Reference: README.md of the td-orchestrator plugin.
+# td-orchestrator config. Reference: README.md of the td-orchestrator plugin.
 config_version: 1
 # Branch that reviewers merge into and worktrees branch from.
 main_branch: main
@@ -1194,7 +1194,7 @@ In `CLAUDE.md`, replace the whole `## Agent orchestrator` section with:
 ```markdown
 ## Agent orchestrator
 
-- Provided by the `claude-orchestrator` plugin (`/home/mne-adm/Git/personal/github.com/claude-orchestrator`, enabled in `.claude/settings.json`). Config: `.claude/orchestrator.md` (test gate, doc paths, role notes).
+- Provided by the `td-orchestrator` plugin (repo `/home/mne-adm/Git/personal/github.com/claude-orchestrator`, enabled in `.claude/settings.json`). Config: `.claude/orchestrator.md` (test gate, doc paths, role notes).
 - Start in a Herdr pane with `/td-orchestrator:orchestrate` (`--dry-run` to preview, `--setup` to re-run the config wizard). It works through all workable td issues with fresh implementer, reviewer and planner agents.
 - Labels: `needs-human` (needs a user decision), `stuck` (3 failed attempts, branch kept), `agent-blocked` (agent waits at a prompt), `plan` (handled by the planner).
 ```

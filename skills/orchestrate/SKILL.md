@@ -5,14 +5,14 @@ description: Run the td-orchestrator — works through all workable td issues of
 
 # Orchestrator
 
-You orchestrate. You start, prompt and monitor other agents and react to the td state they leave behind. You never read or edit code, never run tests, never review work, and never answer an agent's question or permission prompt (single exception: "Folder-trust dialog" below). Commands you run: `herdr`, `td`, read-only `git` (`status`, `branch --list`, `worktree list`, `rev-parse`, `symbolic-ref`, `check-ignore`), plus `git worktree add`, `git worktree remove`, `git branch -d` and `git -C <worktree> rebase --abort` for worktree housekeeping. You may read `<MAIN_REPO>/.claude/orchestrator.md` and `<MAIN_REPO>/.claude/settings.json`. The user is not watching; reach them only through `herdr notification show`. The one exception is the setup wizard, which runs before any agent starts.
+You orchestrate. You start, prompt and monitor other agents and react to the td state they leave behind. You never read or edit code, never run tests, never review work, and never answer an agent's question or permission prompt (single exception: "Folder-trust dialog" below). Commands you run: `herdr`, `td`, read-only `git` (`status`, `branch --list`, `worktree list`, `rev-parse`, `symbolic-ref`, `check-ignore`), plus `git worktree add`, `git worktree remove`, `git branch -d` and `git -C <worktree> rebase --abort` for worktree housekeeping, and `jq` and `claude plugin list` for the preconditions. You may read `<MAIN_REPO>/.claude/orchestrator.md` and `<MAIN_REPO>/.claude/settings.json`. The user is not watching; reach them only through `herdr notification show`. The one exception is the setup wizard (`setup.md`), which runs before any agent starts; while you follow it you may also run the commands it names (`find`, `jq`, `test -x`, `command -v`, `git branch --format`, `git add`, `git commit`, `claude plugin install`) and write the files it names.
 
 Design: `docs/design.md` in the td-orchestrator plugin repository.
 
 ## Arguments
 
 - `--dry-run`: see "Dry run".
-- `--setup`: read `setup.md` in this skill's base directory, follow it, then stop. No Herdr needed.
+- `--setup`: do precondition 1, then read `setup.md` in this skill's base directory, follow it, then stop. No Herdr needed.
 - `--builders N`, `--reviewers M`: override the slot counts from the config.
 
 ## Shell rules
@@ -24,25 +24,26 @@ Design: `docs/design.md` in the td-orchestrator plugin repository.
 
 ## Config
 
-Read `<MAIN_REPO>/.claude/orchestrator.md` and parse its YAML frontmatter. It is **valid** when it parses, `config_version` is `1`, `main_branch` is a non-empty string, `test_gate` is a list (possibly empty), and `plans_dir` is set whenever `specs_dir` is set. For every unknown key, print one line `warning: unknown key <key> in .claude/orchestrator.md` and ignore it — an unknown key never stands in for a required one (`test-gate` does not count as `test_gate`). Defaults for unset optional keys: `builders` 2, `reviewers` 1, `budgets` implementer 90 / reviewer 45 / planner 60 minutes, `legacy_main_mode` false, `specs_dir`/`plans_dir` unset.
+Read `<MAIN_REPO>/.claude/orchestrator.md` and parse its YAML frontmatter. It is **valid** when it parses, `config_version` is `1`, `main_branch` is a non-empty string, `test_gate` is a list of strings (possibly empty), `plans_dir` is set whenever `specs_dir` is set, and every optional key that is set has the right type: `builders` and `reviewers` integers ≥ 1, `budgets` a map whose keys are among `implementer`, `reviewer`, `planner` and whose values are numbers > 0 (missing roles take their default), `legacy_main_mode` a boolean, `specs_dir` and `plans_dir` non-empty strings. A wrong type or range makes the config invalid, like a missing required key. For every unknown key, print one line `warning: unknown key <key> in .claude/orchestrator.md` and ignore it — an unknown key never stands in for a required one (`test-gate` does not count as `test_gate`). Defaults for unset optional keys: `builders` 2, `reviewers` 1, `budgets` implementer 90 / reviewer 45 / planner 60 minutes, `legacy_main_mode` false, `specs_dir`/`plans_dir` unset.
 
 Remember `<MAIN_BRANCH>` = `main_branch`, the slot counts (after `--builders`/`--reviewers`), the budgets, `legacy_main_mode`, and whether `specs_dir` is set (**planner enabled**).
 
 ## Preconditions
 
 1. `git rev-parse --show-toplevel` → remember the printed path as `<MAIN_REPO>`. If it is inside a `.worktrees/` directory, say the orchestrator must run in the main working tree and stop. Then `realpath <this skill's base directory>/../..` → remember it as `<PLUGIN_ROOT>`, the plugin's own root directory. Every worker agent is started with `--plugin-dir <PLUGIN_ROOT>`, so it finds its role skill no matter which settings its worktree's branch contains.
-2. Config: if the file is missing or not valid (see "Config"): with `--dry-run`, list the missing or invalid keys and stop; otherwise read `setup.md` in this skill's base directory and follow it, then re-read the config. If it is still not valid, stop.
-3. `test "${HERDR_ENV:-}" = 1` — otherwise say you are not inside Herdr and stop.
-4. `command -v td`, `command -v herdr` — both must print a path.
+2. `test "${HERDR_ENV:-}" = 1` — otherwise say you are not inside Herdr and stop. This comes before the config check, so the wizard never runs for a run that could not start anyway.
+3. `command -v td`, `command -v herdr`, `command -v jq` — each must print a path.
+4. Config: if the file is missing or not valid (see "Config"): with `--dry-run`, list the missing or invalid keys and stop; otherwise read `setup.md` in this skill's base directory and follow it, then re-read the config. If it is still not valid, stop.
 5. If `<MAIN_REPO>/.claude/settings.json` does not enable `td-orchestrator@td-orchestrator`, print one line `note: td-orchestrator is not enabled for this project (run --setup to enable it)` and continue. This is not a blocker: workers get the plugin through `--plugin-dir <PLUGIN_ROOT>`.
-6. `git -C <MAIN_REPO> rev-parse --abbrev-ref HEAD` must print `<MAIN_BRANCH>`.
-7. `git -C <MAIN_REPO> status --porcelain` must print nothing — reviewers refuse to merge into a dirty main working tree. Otherwise notify the user with the paths and stop.
-8. `echo $HERDR_WORKSPACE_ID` → remember it as `<ORCH_WS>`, your own workspace. Every agent gets its own tab there, so the user sees all agents in one place.
-9. `herdr status` once.
+6. If `claude plugin list` shows no enabled plugin named `superpowers@…`, print one line `note: superpowers plugin not found; implementers and planners need it` and continue (it may be installed in a way the list does not show).
+7. `git -C <MAIN_REPO> rev-parse --abbrev-ref HEAD` must print `<MAIN_BRANCH>`.
+8. `git -C <MAIN_REPO> status --porcelain` must print nothing — reviewers refuse to merge into a dirty main working tree. Otherwise notify the user with the paths and stop.
+9. `echo $HERDR_WORKSPACE_ID` → remember it as `<ORCH_WS>`, your own workspace. Every agent gets its own tab there, so the user sees all agents in one place.
+10. `herdr status` once.
 
 ## Dry run (`--dry-run`)
 
-Report failed preconditions 3–7 instead of stopping. Do "Resume" and "Choose the next action" read-only, then print which agents you would start right now to fill the slots, followed by the ordered queue of the remaining workable issues (role, issue, mode, worktree create/reuse), plus the issues you would skip and why. Start nothing, change nothing, write no files, then stop.
+Report failed preconditions 2, 3 and 5–10 instead of stopping (precondition 4 is handled as described there). Without a working Herdr (precondition 2 or 3 failed, or `herdr agent list` fails), say so, assume there are no live agents and skip every `herdr` command. Do "Resume" and "Choose the next action" read-only, then print which agents you would start right now to fill the slots, followed by the ordered queue of the remaining workable issues (role, issue, mode, worktree create/reuse), plus the issues you would skip and why. Start nothing, change nothing, write no files, then stop.
 
 ## Slots
 

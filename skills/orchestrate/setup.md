@@ -28,7 +28,7 @@ One `AskUserQuestion` call with up to four questions; the detected value is alwa
 
 1. **Main branch** — detected branch, other local branches (`git -C <MAIN_REPO> branch --format='%(refname:short)'`, at most two more). If there is no other local branch, add `main` or `master` (whichever was not detected) as the second option.
 2. **Test gate** — detected commands joined with ` && ` as one option; single commands as further options; option `No test gate ([])` with the description "Agents hand over and merge without running any tests". If the user picks `[]`, confirm it once more in a separate question before accepting.
-3. **Specs and plans** — detected pair `specs: <dir>, plans: <dir>`; option `No planner (no specs_dir)`.
+3. **Specs and plans** — detected pair `specs: <dir>, plans: <dir>`; option `No planner (no specs_dir)`, with the description "plans_dir stays set if a plans directory was detected, so implementers still find plans". Without a planner, `plans_dir` keeps the detected or existing value, if any.
 4. **Remaining settings** — `Keep current (<builders> builders, <reviewers> reviewer(s), budgets <i>/<r>/<p> min, legacy_main_mode <value>)`, filled with the existing values where valid and the detected defaults otherwise, or `Change`. On `Change`, ask a second call for `builders`, `reviewers`, `legacy_main_mode`; budgets are changed by editing the file.
 
 If the user's free input for the test gate contains several commands, split them on ` && ` or newlines into list items.
@@ -56,8 +56,8 @@ If that command fails (for example because the marketplace is not added on this 
 Read the template, replace the placeholders with the confirmed values and write `<MAIN_REPO>/.claude/orchestrator.md`:
 
 - `{{main_branch}}` → the branch name.
-- `{{test_gate}}` → a YAML block list, one `\n  - <command>` per command; `[]` when empty. Quote a command with `"…"` if it contains `: `, `#`, or starts with a YAML special character.
-- `{{specs_dir}}`, `{{plans_dir}}` → the paths; when there is no planner, replace the whole line with `# specs_dir:` / `# plans_dir:` (commented out, i.e. unset).
+- `{{test_gate}}` → a YAML block list, one `\n  - <command>` per command; `[]` when empty. Write a command in single quotes (`'…'`, every `'` inside doubled to `''`) if it contains `: `, ` #`, a quote character, or starts with a YAML special character (`-?:,[]{}#&*!|>'"%@` or a backtick). Never use double quotes: backslashes in them would be read as escapes.
+- `{{specs_dir}}`, `{{plans_dir}}` → the paths. A value that is not set (no planner → no `specs_dir`; no plans directory → no `plans_dir`) replaces its whole line with `# specs_dir:` / `# plans_dir:` (commented out, i.e. unset).
 - `{{builders}}`, `{{reviewers}}`, `{{legacy_main_mode}}` → the values.
 - `{{budgets}}` → a flow map with all three roles, e.g. `{ implementer: 90, reviewer: 45, planner: 60 }`, keeping existing values.
 

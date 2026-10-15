@@ -73,13 +73,13 @@ Run `npm ci` first in a fresh worktree.
 | `main_branch` | yes | – | Branch reviewers merge into and worktrees branch from. |
 | `test_gate` | yes | – | Shell commands run from the worktree root; all must exit 0. `[]` means no gate. |
 | `specs_dir` | no | unset | Where specs live. Unset → the planner role is disabled and `plan` issues are skipped. |
-| `plans_dir` | no | unset | Where plans live. Required when `specs_dir` is set. |
+| `plans_dir` | no | unset | Where plans live. Required when `specs_dir` is set; may be set without it. |
 | `builders` | no | 2 | Builder slots (implementer or planner). |
 | `reviewers` | no | 1 | Reviewer slots. |
 | `budgets` | no | 90/45/60 | Minutes per attempt for implementer/reviewer/planner. |
 | `legacy_main_mode` | no | `false` | Review `in_review` issues that have no `td/<id>` branch directly on the main branch (work done before the repo used git). |
 
-Unknown keys are ignored with a warning. A missing required key, an unparseable frontmatter or an unknown `config_version` starts the wizard.
+Unknown keys are ignored with a warning. A missing required key, an optional key with the wrong type or range, an unparseable frontmatter or an unknown `config_version` starts the wizard.
 
 The optional sections `## Implementer`, `## Reviewer`, `## Planner` are read by that role only. Use them for orchestrator-specific additions; general conventions belong in `CLAUDE.md`.
 
@@ -96,4 +96,4 @@ Fixed conventions: worktrees at `.worktrees/<id>` (add `.worktrees/` to `.gitign
 
 ## Development
 
-`./scripts/check.sh` is the test gate: manifest validation, skill presence, template schema, and no project-specific terms in `skills/` and `templates/`.
+`./scripts/check.sh` is the test gate: manifest validation, skill presence, template schema, and no project-specific terms in `skills/` and `templates/`. It needs the `claude` CLI, `jq` and `python3` with PyYAML. `./scripts/make-fixture.sh <dir>` creates a throwaway git + td repository for trying the setup wizard.
