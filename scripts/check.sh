@@ -76,5 +76,15 @@ hits=$(grep -rniE "$banned" skills templates 2>/dev/null)
 hits=$(grep -rnE 'git [^`]*\b(main|master)\b' skills 2>/dev/null)
 [ -z "$hits" ] || { echo "$hits"; err "hard-coded main/master in git commands (use <MAIN_BRANCH>)"; }
 
+# orchestrator: key rules present
+o=skills/orchestrate/SKILL.md
+if [ -f "$o" ]; then
+	for needle in 'Use skill td-orchestrator:' 'setup.md' '--setup' '--dry-run' \
+		'legacy_main_mode' 'specs_dir' 'td-orchestrator@td-orchestrator' \
+		'unknown key' '<MAIN_BRANCH>' 'orchestrator: prompted' 'agent-blocked'; do
+		grep -qF -- "$needle" "$o" || err "$o lacks: $needle"
+	done
+fi
+
 [ "$fail" = 0 ] && echo "check.sh: all green"
 exit "$fail"
