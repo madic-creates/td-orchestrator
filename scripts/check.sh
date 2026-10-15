@@ -93,7 +93,7 @@ if [ ! -f "$w" ]; then
 else
 	for needle in 'AskUserQuestion' '(Detected)' 'test_gate' 'command -v' 'check-ignore' \
 		'.worktrees/' 'claude plugin install td-orchestrator@td-orchestrator --scope project' \
-		'templates/orchestrator.md' 'chore: td-orchestrator config' 'unknown key' '[]'; do
+		'templates/orchestrator.md' 'chore: td-orchestrator config' 'unknown key' '[]' 'at least two options'; do
 		grep -qF -- "$needle" "$w" || err "$w lacks: $needle"
 	done
 fi

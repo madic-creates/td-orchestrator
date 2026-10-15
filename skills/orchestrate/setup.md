@@ -24,9 +24,9 @@ Otherwise detect:
 
 ## 2. Confirm with the user
 
-One `AskUserQuestion` call with up to four questions; the detected value is always the first option, labelled `<value> (Detected)`. Offer plausible alternatives as further options; "Other" is always available for free input.
+One `AskUserQuestion` call with up to four questions; the detected value is always the first option, labelled `<value> (Detected)`. Offer plausible alternatives as further options; "Other" is always available for free input. Every question needs at least two options (the tool rejects a single one), so never drop a question for lack of alternatives — add the fallback named below.
 
-1. **Main branch** — detected branch, other local branches (`git -C <MAIN_REPO> branch --format='%(refname:short)'`, at most two more).
+1. **Main branch** — detected branch, other local branches (`git -C <MAIN_REPO> branch --format='%(refname:short)'`, at most two more). If there is no other local branch, add `main` or `master` (whichever was not detected) as the second option.
 2. **Test gate** — detected commands joined with ` && ` as one option; single commands as further options; option `No test gate ([])` with the description "Agents hand over and merge without running any tests". If the user picks `[]`, confirm it once more in a separate question before accepting.
 3. **Specs and plans** — detected pair `specs: <dir>, plans: <dir>`; option `No planner (no specs_dir)`.
 4. **Defaults** — `Keep defaults (2 builders, 1 reviewer, budgets 90/45/60 min, legacy_main_mode <detected>)` or `Change`. On `Change`, ask a second call for `builders`, `reviewers`, `legacy_main_mode`.
