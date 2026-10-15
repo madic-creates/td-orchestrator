@@ -61,6 +61,10 @@ for key in ["config_version", "main_branch", "test_gate", "specs_dir", "plans_di
 assert data["config_version"] == 1
 assert data["test_gate"] == ["./x.sh", "say \"a: b\" # it's"], data["test_gate"]
 assert data["budgets"] == {"implementer": 90, "reviewer": 45, "planner": 60}
+# a command ending in ':' must be quoted; unquoted it parses as a one-key map
+gate = lambda g: fill(m.group(1), {**base, "{{test_gate}}": g})["test_gate"]
+assert gate("\n  - 'make check:'") == ["make check:"]
+assert gate("\n  - make check:") == [{"make check": None}]
 # empty gate
 assert fill(m.group(1), {**base, "{{test_gate}}": "[]"})["test_gate"] == []
 # no planner, plans kept
@@ -116,7 +120,7 @@ else
 		'templates/orchestrator.md' 'chore: td-orchestrator config' 'unknown key' '[]' 'at least two options' \
 		'For every key without a valid existing value' 'Keep current' '{{budgets}}' \
 		'commit -m "chore: td-orchestrator config" --' 'rev-parse --abbrev-ref HEAD' \
-		'single quotes' 'plans_dir` keeps'; do
+		'single quotes' 'ends with `:`' 'plans_dir` keeps'; do
 		grep -qF -- "$needle" "$w" || err "$w lacks: $needle"
 	done
 fi

@@ -56,7 +56,7 @@ If that command fails (for example because the marketplace is not added on this 
 Read the template, replace the placeholders with the confirmed values and write `<MAIN_REPO>/.claude/orchestrator.md`:
 
 - `{{main_branch}}` → the branch name.
-- `{{test_gate}}` → a YAML block list, one `\n  - <command>` per command; `[]` when empty. Write a command in single quotes (`'…'`, every `'` inside doubled to `''`) if it contains `: `, ` #`, a quote character, or starts with a YAML special character (`-?:,[]{}#&*!|>'"%@` or a backtick). Never use double quotes: backslashes in them would be read as escapes.
+- `{{test_gate}}` → a YAML block list, one `\n  - <command>` per command; `[]` when empty. Write a command in single quotes (`'…'`, every `'` inside doubled to `''`) if it contains `: `, ` #`, a quote character, ends with `:`, or starts with a YAML special character (`-?:,[]{}#&*!|>'"%@` or a backtick). Never use double quotes: backslashes in them would be read as escapes.
 - `{{specs_dir}}`, `{{plans_dir}}` → the paths. A value that is not set (no planner → no `specs_dir`; no plans directory → no `plans_dir`) replaces its whole line with `# specs_dir:` / `# plans_dir:` (commented out, i.e. unset).
 - `{{builders}}`, `{{reviewers}}`, `{{legacy_main_mode}}` → the values.
 - `{{budgets}}` → a flow map with all three roles, e.g. `{ implementer: 90, reviewer: 45, planner: 60 }`, keeping existing values.
