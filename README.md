@@ -43,7 +43,56 @@ Inside a Herdr pane, in the repository's main working tree:
 
 ## Configuration
 
-See "Configuration reference" below.
+Each repository has one committed file, `.claude/orchestrator.md`. The setup wizard creates it; `/td-orchestrator:orchestrate --setup` runs the wizard again.
+
+```markdown
+---
+config_version: 1
+main_branch: main
+test_gate:
+  - ./run_tests.sh
+specs_dir: docs/specs
+plans_dir: docs/plans
+builders: 2
+reviewers: 1
+budgets: { implementer: 90, reviewer: 45, planner: 60 }
+legacy_main_mode: false
+---
+
+## Implementer
+Run `npm ci` first in a fresh worktree.
+
+## Reviewer
+
+## Planner
+```
+
+| Key | Required | Default | Meaning |
+|---|---|---|---|
+| `config_version` | yes | – | Must be `1`. |
+| `main_branch` | yes | – | Branch reviewers merge into and worktrees branch from. |
+| `test_gate` | yes | – | Shell commands run from the worktree root; all must exit 0. `[]` means no gate. |
+| `specs_dir` | no | unset | Where specs live. Unset → the planner role is disabled and `plan` issues are skipped. |
+| `plans_dir` | no | unset | Where plans live. Required when `specs_dir` is set. |
+| `builders` | no | 2 | Builder slots (implementer or planner). |
+| `reviewers` | no | 1 | Reviewer slots. |
+| `budgets` | no | 90/45/60 | Minutes per attempt for implementer/reviewer/planner. |
+| `legacy_main_mode` | no | `false` | Review `in_review` issues that have no `td/<id>` branch directly on the main branch (work done before the repo used git). |
+
+Unknown keys are ignored with a warning. A missing required key, an unparseable frontmatter or an unknown `config_version` starts the wizard.
+
+The optional sections `## Implementer`, `## Reviewer`, `## Planner` are read by that role only. Use them for orchestrator-specific additions; general conventions belong in `CLAUDE.md`.
+
+Fixed conventions: worktrees at `.worktrees/<id>` (add `.worktrees/` to `.gitignore`), branches `td/<id>`, commit messages end with `(<issue id>)`, labels `needs-human`, `stuck`, `agent-blocked`, `plan`.
+
+### Labels
+
+| Label | Meaning |
+|---|---|
+| `plan` | Handled by the planner: turns a spec into a plan and td issues. |
+| `needs-human` | Needs a decision from you. Skipped until you remove the label. |
+| `stuck` | Failed 3 attempts. Blocked in td; branch kept. |
+| `agent-blocked` | The issue's agent waits at a prompt in its tab. |
 
 ## Development
 
