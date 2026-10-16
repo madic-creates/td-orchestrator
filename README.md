@@ -107,9 +107,9 @@ When the run finishes or an issue needs me, send a mail with
 `mail -s "<subject>" me@example.com`, body on stdin.
 ```
 
-The `## Orchestrator` section lets the orchestrator run the commands it names, but only for the events it already handles: a precondition stops the run, an agent waits at a prompt, `needs-human`, `stuck`, a timeout, the end of the run. Its other limits stay: it never reads code, runs tests or answers agent prompts. A failing command only prints a warning.
+The `## Orchestrator` section lets the orchestrator run the shell commands and call the tools (such as an MCP mail tool) it names, but only for the events it already handles: a precondition stops the run, an agent waits at a prompt, `needs-human`, `stuck`, a timeout, the end of the run. Its other limits stay: it never reads code, runs tests or answers agent prompts. A failing command only prints a warning.
 
-Fixed conventions: worktrees at `.worktrees/<id>` (add `.worktrees/` and `.claude/orchestrator.local.md` to `.gitignore`), branches `td/<id>`, commit messages end with `(<issue id>)`, labels `needs-human`, `stuck`, `agent-blocked`, `plan`.
+Fixed conventions: worktrees at `.worktrees/<id>` (add `.worktrees/` and `.claude/orchestrator.local.md` to `.gitignore`), branches `td/<id>`, no td issue IDs in commit messages (td issues are local), labels `needs-human`, `stuck`, `agent-blocked`, `plan`.
 
 ### Labels
 

@@ -92,7 +92,7 @@ Run `godot --headless --import` first in a fresh worktree.
 
 Unknown keys are ignored with a one-line warning. A set optional key with the wrong type or range (`builders`/`reviewers` not an integer ≥ 1, a budget not a number > 0, `legacy_main_mode` not a boolean) makes the config invalid, like a missing required key.
 
-The body sections `## Implementer`, `## Reviewer`, `## Planner` are optional. A role reads its own section, if present, after the frontmatter. Conventions that already live in the repo's `CLAUDE.md` do not belong here; the sections are for orchestrator-specific additions only. The optional section `## Orchestrator` holds instructions for the orchestrator itself, for example how and when to notify the user beyond Herdr notifications. The orchestrator may run the commands this section names explicitly, only for events it already handles (precondition stop, agent waiting at a prompt, `needs-human`, `stuck`, timeout, end of run). It keeps all other limits, passes td free text only on stdin through a quoted heredoc, and treats a failing command as a warning. Added on 2026-10-16.
+The body sections `## Implementer`, `## Reviewer`, `## Planner` are optional. A role reads its own section, if present, after the frontmatter. Conventions that already live in the repo's `CLAUDE.md` do not belong here; the sections are for orchestrator-specific additions only. The optional section `## Orchestrator` holds instructions for the orchestrator itself, for example how and when to notify the user beyond Herdr notifications. The orchestrator may run the shell commands and call the tools (such as an MCP mail tool) this section names explicitly, only for events it already handles (precondition stop, agent waiting at a prompt, `needs-human`, `stuck`, timeout, end of run). It keeps all other limits, passes td free text only on stdin through a quoted heredoc, and treats a failing command as a warning. Added on 2026-10-16.
 
 ### Local config: `.claude/orchestrator.local.md`
 
@@ -103,7 +103,7 @@ Optional, untracked, same format as the shared file; frontmatter and sections ar
 - **Git:** the file must be ignored, otherwise it dirties the main working tree. The wizard offers the `.gitignore` entry; the orchestrator stops (precondition 4) when the file exists but is not ignored. The wizard never reads or writes the local file.
 - **Worktrees:** every role reads `<MAIN_REPO>/.claude/…`, so the untracked file in the main working tree reaches agents in worktrees.
 
-Fixed conventions (not configurable): worktree `<MAIN_REPO>/.worktrees/<id>`, branch `td/<id>`, commit messages end with `(<ISSUE_ID>)`, agent names `impl-` / `rev-` / `plan-` + id without `td-`, labels `needs-human`, `stuck`, `agent-blocked`, `plan`.
+Fixed conventions (not configurable): worktree `<MAIN_REPO>/.worktrees/<id>`, branch `td/<id>`, no td issue IDs in commit messages (td issues are local, so the reference adds nothing to the history; changed on 2026-10-16), agent names `impl-` / `rev-` / `plan-` + id without `td-`, labels `needs-human`, `stuck`, `agent-blocked`, `plan`.
 
 ## Setup wizard
 
@@ -126,7 +126,7 @@ With `--dry-run` the wizard does not run: the dry run reports which keys are mis
 4. **`.gitignore`:** if `.worktrees/` is not ignored (`git check-ignore -q .worktrees/x`), offer to append it. Declining stops the wizard: untracked worktrees would block every merge. If `.claude/orchestrator.local.md` is not ignored, offer to append it too; declining only matters once the local file exists.
 5. **Plugin enabled for the project:** if `.claude/settings.json` does not enable `td-orchestrator@td-orchestrator`, offer to add it (merging with existing content).
 6. **Write** `.claude/orchestrator.md` from `templates/orchestrator.md` with the confirmed values and empty role sections, then show the result.
-7. **Commit** the changed files on `main_branch` after the user's OK (`chore: td-orchestrator config`, no td suffix required). The run needs a clean main working tree, so a declined commit ends the run with that explanation.
+7. **Commit** the changed files on `main_branch` after the user's OK (`chore: td-orchestrator config`). The run needs a clean main working tree, so a declined commit ends the run with that explanation.
 8. Continue with the normal preconditions.
 
 The wizard is the only part of the orchestrator that talks to the user directly, and it runs only before any agent is started.
@@ -155,7 +155,7 @@ Each role skill starts the same way:
 1. Read `<MAIN_REPO>/.claude/orchestrator.md` and, if present, `<MAIN_REPO>/.claude/orchestrator.local.md`: the merged frontmatter and the role's own body section from each.
 2. Follow the repo's `CLAUDE.md` for language, style and test conventions.
 
-**Implementer:** v1 steps, with the plan/spec lookup in `plans_dir` / `specs_dir` (if set); TDD with `superpowers:test-driven-development` following the repo's test conventions; rebase onto `<MAIN_BRANCH>`; every `test_gate` command must pass; commits end with `(<ISSUE_ID>)`. No mention of any language or framework.
+**Implementer:** v1 steps, with the plan/spec lookup in `plans_dir` / `specs_dir` (if set); TDD with `superpowers:test-driven-development` following the repo's test conventions; rebase onto `<MAIN_BRANCH>`; every `test_gate` command must pass; no td issue ID in commit messages. No mention of any language or framework.
 
 **Reviewer:** v1 steps, with `git diff <MAIN_BRANCH>...<BRANCH>`, the `test_gate` run before and after the rebase, fast-forward merge into `<MAIN_BRANCH>`. The `MODE=main` section stays, used only when the orchestrator passes `MODE=main`.
 

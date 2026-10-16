@@ -20,7 +20,7 @@ Read `<MAIN_REPO>/.claude/orchestrator.md` and, if it exists, the untracked `<MA
 2. Find the spec that covers the issue's scope in `specs_dir`. Read existing plans in `plans_dir` for format and for what is already built.
    - If no spec covers the scope, or the spec leaves product or design decisions open that the plan would need: "Cannot proceed" (list the open decisions) and stop. Do not invent product or design decisions.
 3. Write the plan with superpowers:writing-plans into `<plans_dir>/<YYYY-MM-DD>-<name>.md`. Skip that skill's execution-handoff question; nobody will answer it.
-4. Commit the plan on `<BRANCH>` with a message ending in `(<ISSUE_ID>)`.
+4. Commit the plan on `<BRANCH>`. Do not put the td issue ID in commit messages; td issues are local, so the reference adds nothing to the git history. Follow the repository's `CLAUDE.md` if it asks otherwise.
 5. Create the td issues:
    - one epic: `td epic create "<plan title>"`
    - one feature per plan task, titled `P<N>-T<NN> <task name>`, each with `td update <task> --parent <epic>`

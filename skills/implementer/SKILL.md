@@ -23,7 +23,7 @@ Read `<MAIN_REPO>/.claude/orchestrator.md` and, if it exists, the untracked `<MA
 4. If `REWORK=yes`, read the newest log entry starting with `Rejected:` and the previous handoff in `td context`; fix exactly what was rejected. If the rejection is a rebase conflict with `<MAIN_BRANCH>`, run `git rebase <MAIN_BRANCH>` on your branch and resolve the conflicts.
 5. Implement with TDD (superpowers:test-driven-development) following the repository's test conventions: failing test, minimal code, green.
 6. Other agents merge into `<MAIN_BRANCH>` while you work. Commit your work, then `git rebase <MAIN_BRANCH>` and resolve any conflicts, so the reviewer gets a branch on top of the current `<MAIN_BRANCH>`. Then run every `test_gate` command in order from the worktree root. All must exit 0; do not hand over red tests. An empty `test_gate` means there is nothing to run. Afterwards `git status --porcelain` must be empty (commit generated files that belong to the change).
-7. Commit on `<BRANCH>` with messages ending in `(<ISSUE_ID>)`. Never commit to `<MAIN_BRANCH>` and never merge into it; rebasing your own branch onto it is allowed.
+7. Commit on `<BRANCH>`. Do not put the td issue ID in commit messages; td issues are local, so the reference adds nothing to the git history. Follow the repository's `CLAUDE.md` if it asks otherwise. Never commit to `<MAIN_BRANCH>` and never merge into it; rebasing your own branch onto it is allowed.
 8. `td link <ISSUE_ID> <changed files>` and `td log -i <ISSUE_ID> "<what you did>"`.
 9. `td handoff <ISSUE_ID> --done "..." --remaining "..." --decision "..." --uncertain "..."`.
 10. `td review <ISSUE_ID>`. Then reply with one line, `DONE <ISSUE_ID>`, and stop.
