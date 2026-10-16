@@ -12,7 +12,7 @@ Your start prompt gives you: `ISSUE_ID`, `BRANCH`, `MAIN_REPO`, `MAIN_BRANCH`, `
 
 ## Config
 
-Read `<MAIN_REPO>/.claude/orchestrator.md`: the frontmatter (`test_gate`, `specs_dir`, `plans_dir`) and the `## Implementer` section, if it has content. Then follow the repository's `CLAUDE.md` (language, style, test conventions). The `## Implementer` section takes precedence over this skill where they conflict on repo-specific details (setup commands, generated files).
+Read `<MAIN_REPO>/.claude/orchestrator.md` and, if it exists, the untracked `<MAIN_REPO>/.claude/orchestrator.local.md`: the frontmatter (`test_gate`, `specs_dir`, `plans_dir`; a key set in the local file replaces the shared one) and the `## Implementer` section of each, if it has content (the local one wins where they conflict). Then follow the repository's `CLAUDE.md` (language, style, test conventions). The `## Implementer` section takes precedence over this skill where they conflict on repo-specific details (setup commands, generated files).
 
 ## Steps
 

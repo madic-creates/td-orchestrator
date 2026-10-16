@@ -1,6 +1,6 @@
 # Setup wizard
 
-Creates or completes `<MAIN_REPO>/.claude/orchestrator.md`. You run this before any agent starts, so here, and only here, you talk to the user, always through `AskUserQuestion`. Never run the test gate, never start agents.
+Creates or completes `<MAIN_REPO>/.claude/orchestrator.md`. The wizard only reads and writes this shared file; it never reads or writes the user's untracked `.claude/orchestrator.local.md`. You run this before any agent starts, so here, and only here, you talk to the user, always through `AskUserQuestion`. Never run the test gate, never start agents.
 
 The template is `templates/orchestrator.md` in the plugin root, two directories above this file (`<this skill's base directory>/../../templates/orchestrator.md`).
 
@@ -41,6 +41,8 @@ For each command, take its first word. `./x` or `path/x` → `test -x <MAIN_REPO
 
 `git -C <MAIN_REPO> check-ignore -q .worktrees/x` exits non-zero → ask whether to append `.worktrees/` to `<MAIN_REPO>/.gitignore` (create the file if missing). Declined → stop: worktrees would show up as untracked files and block every merge.
 
+`git -C <MAIN_REPO> check-ignore -q .claude/orchestrator.local.md` exits non-zero → ask whether to append `.claude/orchestrator.local.md` to `<MAIN_REPO>/.gitignore`, so a local config never makes the main working tree dirty. Declined → continue; the orchestrator stops later only if the local file actually exists. Ask both `.gitignore` questions in one `AskUserQuestion` call when both apply.
+
 ## 5. Plugin enabled for the project
 
 Check `jq -e '.enabledPlugins["td-orchestrator@td-orchestrator"] == true' <MAIN_REPO>/.claude/settings.json`. If it fails, ask whether to enable the plugin for this repository, then run in `<MAIN_REPO>`:
@@ -61,7 +63,7 @@ Read the template, replace the placeholders with the confirmed values and write 
 - `{{builders}}`, `{{reviewers}}`, `{{legacy_main_mode}}` → the values.
 - `{{budgets}}` → a flow map with all three roles, e.g. `{ implementer: 90, reviewer: 45, planner: 60 }`, keeping existing values.
 
-If the file existed, keep its role sections' content unchanged and replace only the frontmatter. Show the written file to the user.
+If the file existed, keep its sections' content unchanged and replace only the frontmatter. Show the written file to the user.
 
 ## 7. Commit
 

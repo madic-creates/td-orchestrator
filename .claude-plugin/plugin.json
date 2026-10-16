@@ -1,7 +1,7 @@
 {
   "name": "td-orchestrator",
   "description": "Works through all workable td issues of a repo with fresh implementer, reviewer and planner agents in Herdr tabs and git worktrees.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "madic-creates",
     "url": "https://github.com/madic-creates"

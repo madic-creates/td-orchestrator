@@ -20,6 +20,9 @@ legacy_main_mode: {{legacy_main_mode}}
 <!--
 Optional additions per role. Each role reads its own section after the
 frontmatter. Conventions that already live in CLAUDE.md do not belong here.
+## Orchestrator holds instructions for the orchestrator itself, e.g. extra
+notifications. Personal settings go into the untracked
+.claude/orchestrator.local.md (same format, every part optional).
 -->
 
 ## Implementer
@@ -27,3 +30,5 @@ frontmatter. Conventions that already live in CLAUDE.md do not belong here.
 ## Reviewer
 
 ## Planner
+
+## Orchestrator

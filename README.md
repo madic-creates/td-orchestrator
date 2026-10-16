@@ -46,7 +46,7 @@ Inside a Herdr pane, in the repository's main working tree:
 
 ## Configuration
 
-Each repository has one committed file, `.claude/orchestrator.md`. The setup wizard creates it; `/td-orchestrator:orchestrate --setup` runs the wizard again.
+Each repository has one committed file, `.claude/orchestrator.md`. The setup wizard creates it; `/td-orchestrator:orchestrate --setup` runs the wizard again. An optional untracked `.claude/orchestrator.local.md` adds personal settings (see "Local config").
 
 ```markdown
 ---
@@ -68,6 +68,8 @@ Run `npm ci` first in a fresh worktree.
 ## Reviewer
 
 ## Planner
+
+## Orchestrator
 ```
 
 | Key | Required | Default | Meaning |
@@ -84,9 +86,30 @@ Run `npm ci` first in a fresh worktree.
 
 Unknown keys are ignored with a warning. A missing required key, an optional key with the wrong type or range, an unparseable frontmatter or an unknown `config_version` starts the wizard.
 
-The optional sections `## Implementer`, `## Reviewer`, `## Planner` are read by that role only. Use them for orchestrator-specific additions; general conventions belong in `CLAUDE.md`.
+The optional sections `## Implementer`, `## Reviewer`, `## Planner` are read by that role only. Use them for orchestrator-specific additions; general conventions belong in `CLAUDE.md`. The optional section `## Orchestrator` holds instructions for the orchestrator itself (see below).
 
-Fixed conventions: worktrees at `.worktrees/<id>` (add `.worktrees/` to `.gitignore`), branches `td/<id>`, commit messages end with `(<issue id>)`, labels `needs-human`, `stuck`, `agent-blocked`, `plan`.
+### Local config
+
+`.claude/orchestrator.local.md` is an optional, untracked file for your own settings. It has the same format as `.claude/orchestrator.md`, and every part of it is optional:
+
+- **Frontmatter:** each key set here replaces the shared value. `budgets` is merged per role, so `budgets: { implementer: 120 }` changes only the implementer budget. The merged result is validated like the shared file.
+- **Sections:** each section is appended to the shared section of the same name. Where they conflict, the local one wins.
+
+The file must be ignored by git, otherwise it would make the main working tree dirty. The setup wizard offers to add it to `.gitignore`, and the orchestrator stops if the file exists but is not ignored. The wizard never reads or writes this file.
+
+```markdown
+---
+builders: 3
+---
+
+## Orchestrator
+When the run finishes or an issue needs me, send a mail with
+`mail -s "<subject>" me@example.com`, body on stdin.
+```
+
+The `## Orchestrator` section lets the orchestrator run the commands it names, but only for the events it already handles: a precondition stops the run, an agent waits at a prompt, `needs-human`, `stuck`, a timeout, the end of the run. Its other limits stay: it never reads code, runs tests or answers agent prompts. A failing command only prints a warning.
+
+Fixed conventions: worktrees at `.worktrees/<id>` (add `.worktrees/` and `.claude/orchestrator.local.md` to `.gitignore`), branches `td/<id>`, commit messages end with `(<issue id>)`, labels `needs-human`, `stuck`, `agent-blocked`, `plan`.
 
 ### Labels
 

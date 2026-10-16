@@ -12,7 +12,7 @@ Your start prompt gives you: `ISSUE_ID`, `BRANCH`, `MAIN_REPO`, `MAIN_BRANCH`, `
 
 ## Config
 
-Read `<MAIN_REPO>/.claude/orchestrator.md`: the frontmatter (`specs_dir`, `plans_dir`) and the `## Planner` section, if it has content. Then follow the repository's `CLAUDE.md`. The orchestrator starts you only when `specs_dir` is set; if it is not, "Cannot proceed".
+Read `<MAIN_REPO>/.claude/orchestrator.md` and, if it exists, the untracked `<MAIN_REPO>/.claude/orchestrator.local.md`: the frontmatter (`specs_dir`, `plans_dir`; a key set in the local file replaces the shared one) and the `## Planner` section of each, if it has content (the local one wins where they conflict). Then follow the repository's `CLAUDE.md`. The orchestrator starts you only when `specs_dir` is set; if it is not, "Cannot proceed".
 
 ## Steps
 

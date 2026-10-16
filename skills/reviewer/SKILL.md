@@ -12,7 +12,7 @@ Your start prompt gives you: `ISSUE_ID`, `BRANCH`, `MAIN_REPO`, `MAIN_BRANCH`, `
 
 ## Config
 
-Read `<MAIN_REPO>/.claude/orchestrator.md`: the frontmatter (`test_gate`, `specs_dir`, `plans_dir`) and the `## Reviewer` section, if it has content. Then follow the repository's `CLAUDE.md`.
+Read `<MAIN_REPO>/.claude/orchestrator.md` and, if it exists, the untracked `<MAIN_REPO>/.claude/orchestrator.local.md`: the frontmatter (`test_gate`, `specs_dir`, `plans_dir`; a key set in the local file replaces the shared one) and the `## Reviewer` section of each, if it has content (the local one wins where they conflict). Then follow the repository's `CLAUDE.md`.
 
 **Running the test gate** below means: run every `test_gate` command in order from your working directory; all must exit 0. An empty `test_gate` means there is nothing to run; review the code all the more carefully.
 

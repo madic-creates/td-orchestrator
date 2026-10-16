@@ -73,8 +73,8 @@ assert "specs_dir" not in data and data["plans_dir"] == "docs/plans"
 # neither specs nor plans
 data = fill(m.group(1), base, unset=("specs_dir", "plans_dir"))
 assert "specs_dir" not in data and "plans_dir" not in data
-for section in ["## Implementer", "## Reviewer", "## Planner"]:
-	assert section in text, f"section {section} missing"
+for section in ["## Implementer", "## Reviewer", "## Planner", "## Orchestrator"]:
+	assert re.search(rf"^{section}$", text, re.M), f"section {section} missing"
 PY
 fi
 
@@ -105,7 +105,9 @@ if [ -f "$o" ]; then
 		'legacy_main_mode' 'specs_dir' 'td-orchestrator@td-orchestrator' \
 		'unknown key' '<MAIN_BRANCH>' 'orchestrator: prompted' 'agent-blocked' \
 		'--plugin-dir <PLUGIN_ROOT>' '<PLUGIN_ROOT>' 'command -v jq' 'superpowers' \
-		'integers ≥ 1' 'assume there are no live agents' 'do precondition 1, then read'; do
+		'integers ≥ 1' 'assume there are no live agents' 'do precondition 1, then read' \
+		'orchestrator.local.md' 'merged per role' 'check-ignore -q .claude/orchestrator.local.md' \
+		'## Orchestrator instructions' "<<'EOF'" 'orchestrator instruction failed'; do
 		grep -qF -- "$needle" "$o" || err "$o lacks: $needle"
 	done
 fi
@@ -120,10 +122,16 @@ else
 		'templates/orchestrator.md' 'chore: td-orchestrator config' 'unknown key' '[]' 'at least two options' \
 		'For every key without a valid existing value' 'Keep current' '{{budgets}}' \
 		'commit -m "chore: td-orchestrator config" --' 'rev-parse --abbrev-ref HEAD' \
-		'single quotes' 'ends with `:`' 'plans_dir` keeps'; do
+		'single quotes' 'ends with `:`' 'plans_dir` keeps' \
+		'check-ignore -q .claude/orchestrator.local.md'; do
 		grep -qF -- "$needle" "$w" || err "$w lacks: $needle"
 	done
 fi
+# roles: read the local config next to the shared one
+for s in implementer reviewer planner; do
+	grep -qF '<MAIN_REPO>/.claude/orchestrator.local.md' "skills/$s/SKILL.md" \
+		|| err "skills/$s/SKILL.md lacks the local config"
+done
 [ -x scripts/make-fixture.sh ] || err "missing executable scripts/make-fixture.sh"
 [ -f LICENSE ] || err "missing LICENSE"
 
